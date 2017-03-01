@@ -1,0 +1,20 @@
+{
+	"forge_marker": 1,
+	"defaults" : {
+		"model": "shootit:printer"
+	},
+	"variants": {
+		"facing": {
+			"up": { "model": "shootit:printer" },
+			"down": { "model": "shootit:printer" },
+			"north": { "model": "shootit:printer" },
+			"south": { "model": "shootit:printer", "y": 180 },
+			"west":  { "model": "shootit:printer", "y": 270 },
+			"east":  { "model": "shootit:printer", "y": 90 }
+		},
+		"normal": [{}],
+        "inventory": [{
+			"transform": "forge:default-block"
+		}]
+    }
+}

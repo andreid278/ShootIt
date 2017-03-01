@@ -1,0 +1,9 @@
+item.memorycard.name=Memory card
+item.camera.name=Camera
+item.photoitem.name=Photo
+
+tile.printer.name=Printer
+
+itemGroup.shootit=ShootIt
+
+entity.shootit.photo.name=Photo
