@@ -145,8 +145,11 @@ public class ClientProxy extends CommonProxy {
 		Statics.isShooting = false;
 		if(!Minecraft.getMinecraft().isSingleplayer()) {
 			try {
-				Statics.photosFolderPathClient = Minecraft.getMinecraft().mcDataDir.getCanonicalPath() + Statics.slash + "photos" + Statics.slash + "assets" + Statics.slash + "photos" + Statics.slash + "Multiplayer" + Statics.slash + Minecraft.getMinecraft().getCurrentServerData().serverIP;
-				Statics.resourceLocationPath = "Multiplayer/" + Minecraft.getMinecraft().getCurrentServerData().serverIP;
+				String s = Minecraft.getMinecraft().getCurrentServerData().serverIP;
+				if(s.indexOf(':') > 0)
+					s = s.replace(':', '-');
+				Statics.photosFolderPathClient = Minecraft.getMinecraft().mcDataDir.getCanonicalPath() + Statics.slash + "photos" + Statics.slash + "assets" + Statics.slash + "photos" + Statics.slash + "Multiplayer" + Statics.slash + s;
+				Statics.resourceLocationPath = "Multiplayer/" + s;
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

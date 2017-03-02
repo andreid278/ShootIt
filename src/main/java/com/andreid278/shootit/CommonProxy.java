@@ -48,7 +48,7 @@ public class CommonProxy {
 	@EventHandler
 	public void preInit(FMLPreInitializationEvent event) {
 		String os = System.getProperty("os.name").toLowerCase();
-		if(os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0)
+		if(os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0 || os.indexOf("mac") >= 0)
 			Statics.slash = "/";
 		registerItems();
 		int id = 0;
