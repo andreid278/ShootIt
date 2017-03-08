@@ -1,41 +1,55 @@
 package com.andreid278.shootit.Containers;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
+import com.andreid278.shootit.Main;
+import com.andreid278.shootit.Network.MessagePrinterToClient;
 import com.andreid278.shootit.TileEntities.TEPrinter;
+import com.google.common.collect.Lists;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.oredict.OreDictionary;
 
 public class PrinterContainer extends Container {
 	public TEPrinter te;
+	
 	public PrinterContainer(InventoryPlayer inventory, TEPrinter te) {
 		this.te = te;
-		
+		this.te.parent = this;
+
 		for (int i = 0; i < 9; i++) {
-			addSlotToContainer(new Slot(inventory, i, 8 + i * 18, 142));
+			addSlotToContainer(new Slot(inventory, i, 8 + i * 18, 186));
 		}
-		
+
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 9; j++) {
-				addSlotToContainer(new Slot(inventory, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
+				addSlotToContainer(new Slot(inventory, j + i * 9 + 9, 8 + j * 18, 128 + i * 18));
 			}
 		}
 
 		addSlotToContainer(new ModSlot(te, 0, 8, 8));
-		
+
 		for(int i = 0; i < 4; i++)
 			addSlotToContainer(new ModSlot(te, i + 1, 8 + i * 18, 60));
-		
+
 		addSlotToContainer(new ModSlot(te, 5, 88, 60));
-		
+
 		addSlotToContainer(new ModSlot(te, 6, 152, 60));
+
+		addSlotToContainer(new ModSlot(te, 7, 88, 84));
+
+		addSlotToContainer(new ModSlot(te, 8, 88, 106));
 	}
-	
+
 	@Override
 	public boolean canInteractWith(EntityPlayer playerIn) {
 		return te.isUseableByPlayer(playerIn);
@@ -92,5 +106,23 @@ public class PrinterContainer extends Container {
 			slot.onPickupFromSlot(playerIn, itemstack1);
 		}
 		return itemstack;
+	}
+
+	@Override
+	public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player) {
+		ItemStack itemStack = super.slotClick(slotId, dragType, clickTypeIn, player);
+//		System.out.println(slotId + " " + ((slotId == 43 || slotId == 44) ? getSlot(slotId).getHasStack() : "null"));
+//		if(slotId == 43 || slotId == 44) {
+//			if(this.getSlot(slotId).getStack() == null)
+//				for(IContainerListener listener : listeners) {
+//					if(listener instanceof EntityPlayerMP)
+//						Main.network.sendTo(new MessagePrinterToClient(te.getPos(), (byte)(slotId - 36), null), (EntityPlayerMP)listener);
+//				}
+//			else
+//				for(IContainerListener listener : listeners)
+//					if(listener instanceof EntityPlayerMP)
+//						Main.network.sendTo(new MessagePrinterToClient(te.getPos(), (byte)(slotId - 38), this.getSlot(slotId).getStack()), (EntityPlayerMP)listener);
+//		}
+		return itemStack;
 	}
 }

@@ -1,15 +1,27 @@
 package com.andreid278.shootit.TileEntities;
 
-import com.andreid278.shootit.Items.MemoryCard;
+import java.lang.reflect.Field;
+import java.util.List;
 
+import com.andreid278.shootit.Main;
+import com.andreid278.shootit.Containers.PrinterContainer;
+import com.andreid278.shootit.Items.MemoryCard;
+import com.andreid278.shootit.Network.MessagePrinterToClient;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.ItemStackHelper;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
@@ -21,12 +33,22 @@ public class TEPrinter extends TileEntity implements IInventory {
 	public byte width;
 	public byte height;
 	public int curPhoto;
+	public boolean checkboxFrames;
+	public boolean checkboxBack;
+	public PrinterContainer parent;
 
 	public TEPrinter() {
-		inventory = new ItemStack[7];
+		inventory = new ItemStack[9];
 		width = 1;
 		height = 1;
 		curPhoto = 0;
+		checkboxFrames = false;
+		checkboxBack = false;
+	}
+
+	public TEPrinter(PrinterContainer container) {
+		super();
+		this.parent = container;
 	}
 
 	public NBTTagCompound writeToNBT(NBTTagCompound compound) {
@@ -44,6 +66,8 @@ public class TEPrinter extends TileEntity implements IInventory {
 		compound.setByte("width", width);
 		compound.setByte("height", height);
 		compound.setInteger("curPhoto", curPhoto);
+		compound.setBoolean("frames", checkboxFrames);
+		compound.setBoolean("back", checkboxBack);
 		return compound;
 	}
 
@@ -59,6 +83,8 @@ public class TEPrinter extends TileEntity implements IInventory {
 		width = compound.getByte("width");
 		height = compound.getByte("height");
 		curPhoto = compound.getInteger("curPhoto");
+		checkboxFrames = compound.getBoolean("frames");
+		checkboxBack = compound.getBoolean("back");
 	}
 
 	public SPacketUpdateTileEntity getUpdatePacket() {
@@ -140,6 +166,38 @@ public class TEPrinter extends TileEntity implements IInventory {
 				}
 				else curPhoto = 0;
 			}
+			if(index == 7|| index == 8) {
+				Class container = parent.getClass();
+				Field listenersField = null;
+				try {
+					listenersField = container.getSuperclass().getDeclaredField("listeners");
+				} catch (NoSuchFieldException | SecurityException e) {
+					try {
+						listenersField = container.getSuperclass().getDeclaredField("field_75149_d");
+					} catch (NoSuchFieldException | SecurityException e1) {
+						e1.printStackTrace();
+					}
+				}
+				if(listenersField != null) {
+					try {
+						listenersField.setAccessible(true);
+						List<IContainerListener> listeners = (List<IContainerListener>) listenersField.get(parent);
+
+						if(stack == null)
+							for(IContainerListener listener : listeners) {
+								if(listener instanceof EntityPlayerMP)
+									Main.network.sendTo(new MessagePrinterToClient(getPos(), (byte)(index), null), (EntityPlayerMP)listener);
+							}
+						else
+							for(IContainerListener listener : listeners)
+								if(listener instanceof EntityPlayerMP)
+									Main.network.sendTo(new MessagePrinterToClient(getPos(), (byte)(index - 2), stack), (EntityPlayerMP)listener);
+					} catch (IllegalArgumentException | IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
 			inventory[index] = stack;
 			markDirty();
 		}
@@ -203,6 +261,10 @@ public class TEPrinter extends TileEntity implements IInventory {
 					return true;
 			}
 		}
+		if(index == 7 || index == 8)
+			return (stack.getItem() instanceof ItemBlock)
+					//					&& !(Block.getBlockFromItem(stack.getItem()) instanceof ITileEntityProvider)
+					&& Block.getBlockFromItem(stack.getItem()).isFullCube(Block.getBlockFromItem(stack.getItem()).getStateFromMeta(stack.getMetadata()));
 		return false;
 	}
 

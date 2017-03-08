@@ -12,7 +12,7 @@ import com.andreid278.shootit.Network.MessageRequestForNextPhotoID;
 import com.andreid278.shootit.Network.MessageRequestForPhoto;
 import com.andreid278.shootit.Network.MessageRequestNoPhoto;
 import com.andreid278.shootit.Network.MessageSpawnEntityOnClient;
-import com.andreid278.shootit.Network.MessageUpdatePrinterOnClient;
+import com.andreid278.shootit.Network.MessagePrinterToClient;
 import com.andreid278.shootit.Network.PhotoLoaderToClient;
 import com.andreid278.shootit.Network.PhotoLoaderToServer;
 
@@ -32,7 +32,7 @@ import net.minecraftforge.fml.relauncher.Side;
 @Mod(modid = Main.MODID, version = Main.VERSION)
 public class Main {
 	public final static String MODID = "shootit";
-	public final static String VERSION = "v0.1";
+	public final static String VERSION = "v0.2";
 
 	@Instance(value = MODID)
 	public static Main instance;
@@ -53,7 +53,7 @@ public class Main {
 		network.registerMessage(MessageRequestForNextPhotoID.Handler.class, MessageRequestForNextPhotoID.class, 2, Side.SERVER);
 		network.registerMessage(MessageReplyForNextPhotoID.Handler.class, MessageReplyForNextPhotoID.class, 3, Side.CLIENT);
 		network.registerMessage(MessagePrinterToServer.Handler.class, MessagePrinterToServer.class, 4, Side.SERVER);
-		network.registerMessage(MessageUpdatePrinterOnClient.Handler.class, MessageUpdatePrinterOnClient.class, 5, Side.CLIENT);
+		network.registerMessage(MessagePrinterToClient.Handler.class, MessagePrinterToClient.class, 5, Side.CLIENT);
 		network.registerMessage(PhotoLoaderToServer.Handler.class, PhotoLoaderToServer.class, 6, Side.SERVER);
 		network.registerMessage(MessagePlayerLoggedIn.Handler.class, MessagePlayerLoggedIn.class, 7, Side.CLIENT);
 		network.registerMessage(PhotoLoaderToClient.Handler.class, PhotoLoaderToClient.class, 8, Side.CLIENT);

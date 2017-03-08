@@ -11,7 +11,7 @@ import com.andreid278.shootit.Misc.Statics;
 import com.andreid278.shootit.Network.MessageCameraToClient;
 import com.andreid278.shootit.Network.MessageDeletePhotoToClients;
 import com.andreid278.shootit.Network.MessagePlayerLoggedIn;
-import com.andreid278.shootit.Network.MessageUpdatePrinterOnClient;
+import com.andreid278.shootit.Network.MessagePrinterToClient;
 import com.andreid278.shootit.TileEntities.TEPrinter;
 
 import net.minecraft.block.material.Material;
@@ -91,7 +91,7 @@ public class CommonProxy {
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(printer), "ABA", "ACD", "AAA", 'A', Items.IRON_INGOT, 'B', "blockGlass", 'C', Items.REDSTONE, 'D', "dye"));
 	}
 
-	public IMessage onMessage(MessageUpdatePrinterOnClient message, MessageContext ctx) {
+	public IMessage onMessage(MessagePrinterToClient message, MessageContext ctx) {
 		return null;
 	}
 

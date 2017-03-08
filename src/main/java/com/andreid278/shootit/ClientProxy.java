@@ -12,6 +12,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import com.andreid278.shootit.Entity.EntityPainting;
 import com.andreid278.shootit.Events.MouseEvents;
 import com.andreid278.shootit.Events.PlayerRenderEvents;
+import com.andreid278.shootit.Gui.PrinterGui;
 import com.andreid278.shootit.Items.Camera;
 import com.andreid278.shootit.Misc.CustomFolderResourcePack;
 import com.andreid278.shootit.Misc.Photos;
@@ -19,13 +20,17 @@ import com.andreid278.shootit.Misc.Statics;
 import com.andreid278.shootit.Network.MessageCameraToClient;
 import com.andreid278.shootit.Network.MessageDeletePhotoToClients;
 import com.andreid278.shootit.Network.MessagePlayerLoggedIn;
-import com.andreid278.shootit.Network.MessageUpdatePrinterOnClient;
+import com.andreid278.shootit.Network.MessagePrinterToClient;
 import com.andreid278.shootit.Renderer.CameraRenderEvents;
 import com.andreid278.shootit.Renderer.RendererPainting;
 import com.andreid278.shootit.TileEntities.TEPrinter;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.ItemMeshDefinition;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.ITextureObject;
@@ -35,6 +40,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
@@ -132,12 +138,63 @@ public class ClientProxy extends CommonProxy {
 		ModelLoader.setCustomModelResourceLocation(itemPrinter, 0, new ModelResourceLocation(Main.MODID + ":printer", "inventory"));
 	}
 
-	public IMessage onMessage(MessageUpdatePrinterOnClient message, MessageContext ctx) {
+	public IMessage onMessage(MessagePrinterToClient message, MessageContext ctx) {
 		World world = Minecraft.getMinecraft().theWorld;
 		TileEntity te = world.getTileEntity(message.pos);
 		if(te != null)
-			if(te instanceof TEPrinter)
-				((TEPrinter) te).setField(message.id, message.value);
+			if(te instanceof TEPrinter) {
+				if(message.id < 3)
+					((TEPrinter) te).setField(message.id, message.value);
+				else if(message.id == 3)
+					((TEPrinter)te).checkboxFrames = message.checkbox;
+				else if(message.id == 4)
+					((TEPrinter)te).checkboxBack = message.checkbox;
+				else if(message.id == 5 || message.id == 6) {
+					if(Minecraft.getMinecraft().currentScreen instanceof PrinterGui) {
+						PrinterGui gui = (PrinterGui) Minecraft.getMinecraft().currentScreen;
+						if(message.id == 5) {
+							gui.framesRL.clear();
+							gui.curFrames = 0;
+						}
+						else {
+							gui.backRL.clear();
+							gui.curBack = 0;
+						}
+						Block block = Block.getBlockFromItem(message.itemStack.getItem());
+						BlockRendererDispatcher blockrendererdispatcher = Minecraft.getMinecraft().getBlockRendererDispatcher();
+						for(int i = 0; i < 6; i++) {
+							IBlockState state = block.getStateFromMeta(message.itemStack.getMetadata());
+							List<BakedQuad> quads = blockrendererdispatcher.getModelForState(state).getQuads(state, EnumFacing.getFront(i), 1);
+							for(BakedQuad quad : quads) {
+								ResourceLocation trl = new ResourceLocation(quad.getSprite().getIconName());
+								trl = new ResourceLocation(trl.getResourceDomain(), String.format("%s/%s%s", new Object[] {"textures", trl.getResourcePath(), ".png"}));
+								if(message.id == 5) {
+									if(!gui.framesRL.contains(trl))
+										gui.framesRL.add(trl);
+								}
+								else {
+									if(!gui.backRL.contains(trl))
+										gui.backRL.add(trl);
+								}
+							}
+						}
+					}
+				}
+				else if(message.id == 7) {
+					if(Minecraft.getMinecraft().currentScreen instanceof PrinterGui) {
+						PrinterGui gui = (PrinterGui) Minecraft.getMinecraft().currentScreen;
+						gui.framesRL.clear();
+						gui.curFrames = 0;
+					}
+				}
+				else if(message.id == 8) {
+					if(Minecraft.getMinecraft().currentScreen instanceof PrinterGui) {
+						PrinterGui gui = (PrinterGui) Minecraft.getMinecraft().currentScreen;
+						gui.backRL.clear();
+						gui.curBack = 0;
+					}
+				}
+			}
 		return null;
 	}
 

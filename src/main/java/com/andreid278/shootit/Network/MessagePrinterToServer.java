@@ -8,6 +8,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
@@ -22,12 +23,14 @@ public class MessagePrinterToServer implements IMessage {
 	public int posY;
 	public int posZ;
 	public boolean increase;
+	public ResourceLocation framesRL;
+	public ResourceLocation backRL;
 
 	public MessagePrinterToServer() {
 
 	}
 
-	public MessagePrinterToServer(byte messageID, int index, byte width, byte height, BlockPos pos) {
+	public MessagePrinterToServer(byte messageID, int index, byte width, byte height, BlockPos pos, ResourceLocation framesRL, ResourceLocation backRL) {
 		this.messageID = messageID;
 		this.index = index;
 		this.width = width;
@@ -35,11 +38,20 @@ public class MessagePrinterToServer implements IMessage {
 		posX = pos.getX();
 		posY = pos.getY();
 		posZ = pos.getZ();
+		this.framesRL = framesRL;
+		this.backRL = backRL;
 	}
 
 	public MessagePrinterToServer(byte messageID, boolean increase, BlockPos pos) {
 		this.messageID = messageID;
 		this.increase = increase;
+		posX = pos.getX();
+		posY = pos.getY();
+		posZ = pos.getZ();
+	}
+
+	public MessagePrinterToServer(byte messageID, BlockPos pos) {
+		this.messageID = messageID;
 		posX = pos.getX();
 		posY = pos.getY();
 		posZ = pos.getZ();
@@ -52,6 +64,22 @@ public class MessagePrinterToServer implements IMessage {
 			index = buf.readInt();
 			width = buf.readByte();
 			height = buf.readByte();
+			int l = buf.readInt();
+			if(l > 0) {
+				String s;
+				byte[] byteBuffer = new byte[l];
+				buf.readBytes(byteBuffer, 0, l);
+				framesRL = new ResourceLocation(new String(byteBuffer));
+			}
+			else framesRL = null;
+			l = buf.readInt();
+			if(l > 0) {
+				String s;
+				byte[] byteBuffer = new byte[l];
+				buf.readBytes(byteBuffer, 0, l);
+				backRL = new ResourceLocation(new String(byteBuffer));
+			}
+			else backRL = null;
 		}
 		else if(messageID == 1 || messageID == 2 || messageID == 3)
 			increase = buf.readBoolean();
@@ -67,6 +95,20 @@ public class MessagePrinterToServer implements IMessage {
 			buf.writeInt(index);
 			buf.writeByte(width);
 			buf.writeByte(height);
+			if(framesRL == null)
+				buf.writeInt(0);
+			else {
+				byte[] byteBuffer = framesRL.toString().getBytes();
+				buf.writeInt(byteBuffer.length);
+				buf.writeBytes(byteBuffer, 0, byteBuffer.length);
+			}
+			if(backRL == null)
+				buf.writeInt(0);
+			else {
+				byte[] byteBuffer = backRL.toString().getBytes();
+				buf.writeInt(byteBuffer.length);
+				buf.writeBytes(byteBuffer, 0, byteBuffer.length);
+			}
 		}
 		else if(messageID == 1 || messageID == 2 || messageID == 3)
 			buf.writeBoolean(increase);
@@ -88,6 +130,8 @@ public class MessagePrinterToServer implements IMessage {
 						compound.setInteger("index", message.index);
 						compound.setByte("width", message.width);
 						compound.setByte("height", message.height);
+						compound.setString("frames", message.framesRL == null ? "" : message.framesRL.toString());
+						compound.setString("back", message.backRL == null ? "" : message.backRL.toString());
 						stack.setTagCompound(compound);
 						if(((TEPrinter)tileEntity).getStackInSlot(6) == null) {
 							for(int i = 1; i < 6; i++) {
@@ -114,7 +158,7 @@ public class MessagePrinterToServer implements IMessage {
 										curPhoto = curPhoto > 0 ? curPhoto - 1 : length - 1;
 									}
 									((TEPrinter) tileEntity).setField(2, curPhoto);
-									Main.network.sendTo(new MessageUpdatePrinterOnClient(new BlockPos(message.posX, message.posY, message.posZ), (byte)2, curPhoto), ctx.getServerHandler().playerEntity);
+									Main.network.sendTo(new MessagePrinterToClient(new BlockPos(message.posX, message.posY, message.posZ), (byte)2, curPhoto), ctx.getServerHandler().playerEntity);
 								}
 							}
 						break;
@@ -124,13 +168,13 @@ public class MessagePrinterToServer implements IMessage {
 							if(width < 10) {
 								width++;
 								((TEPrinter) tileEntity).setField(0, width);
-								Main.network.sendTo(new MessageUpdatePrinterOnClient(new BlockPos(message.posX, message.posY, message.posZ), (byte)0, width), ctx.getServerHandler().playerEntity);
+								Main.network.sendTo(new MessagePrinterToClient(new BlockPos(message.posX, message.posY, message.posZ), (byte)0, width), ctx.getServerHandler().playerEntity);
 							}
 						}
 						else if(width > 1) {
 							width--;
 							((TEPrinter) tileEntity).setField(0, width);
-							Main.network.sendTo(new MessageUpdatePrinterOnClient(new BlockPos(message.posX, message.posY, message.posZ), (byte)0, width), ctx.getServerHandler().playerEntity);							
+							Main.network.sendTo(new MessagePrinterToClient(new BlockPos(message.posX, message.posY, message.posZ), (byte)0, width), ctx.getServerHandler().playerEntity);							
 						}
 						break;
 					case 3:
@@ -139,14 +183,22 @@ public class MessagePrinterToServer implements IMessage {
 							if(height < 10) {
 								height++;
 								((TEPrinter) tileEntity).setField(1, height);
-								Main.network.sendTo(new MessageUpdatePrinterOnClient(new BlockPos(message.posX, message.posY, message.posZ), (byte)1, height), ctx.getServerHandler().playerEntity);
+								Main.network.sendTo(new MessagePrinterToClient(new BlockPos(message.posX, message.posY, message.posZ), (byte)1, height), ctx.getServerHandler().playerEntity);
 							}
 						}
 						else if(height > 1) {
 							height--;
 							((TEPrinter) tileEntity).setField(1, height);
-							Main.network.sendTo(new MessageUpdatePrinterOnClient(new BlockPos(message.posX, message.posY, message.posZ), (byte)1, height), ctx.getServerHandler().playerEntity);							
+							Main.network.sendTo(new MessagePrinterToClient(new BlockPos(message.posX, message.posY, message.posZ), (byte)1, height), ctx.getServerHandler().playerEntity);							
 						}
+						break;
+					case 4:
+						((TEPrinter)tileEntity).checkboxFrames = !((TEPrinter)tileEntity).checkboxFrames;
+						Main.network.sendTo(new MessagePrinterToClient(new BlockPos(message.posX, message.posY, message.posZ), (byte)3, ((TEPrinter)tileEntity).checkboxFrames), ctx.getServerHandler().playerEntity);							
+						break;
+					case 5:
+						((TEPrinter)tileEntity).checkboxBack = !((TEPrinter)tileEntity).checkboxBack;
+						Main.network.sendTo(new MessagePrinterToClient(new BlockPos(message.posX, message.posY, message.posZ), (byte)4, ((TEPrinter)tileEntity).checkboxBack), ctx.getServerHandler().playerEntity);							
 						break;
 					}
 				}

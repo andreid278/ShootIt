@@ -20,6 +20,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -36,15 +37,18 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 	public int index;
 	public int width;
 	public int height;
+	public int rotation;
+	public ResourceLocation framesRL;
+	public ResourceLocation backRL;
 
 	public EntityPainting(World worldIn) {
 		super(worldIn);
 	}
 
-	public EntityPainting(World worldIn, BlockPos bp, EnumFacing facing, int width, int height, int index) {
+	public EntityPainting(World worldIn, BlockPos bp, EnumFacing facing, int width, int height, int index, int rotation, ResourceLocation framesRL, ResourceLocation backRL) {
 		super(worldIn);
 		this.posX = bp.getX() + facing.getFrontOffsetX() * 1.01;
-		this.posY = bp.getY() + facing.getFrontOffsetY() * 1.01;
+		this.posY = bp.getY();
 		this.posZ = bp.getZ() + facing.getFrontOffsetZ() * 1.01;
 		this.facing = facing;
 		this.width = width;
@@ -75,6 +79,58 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 			offsetY = height;
 			offsetZ = width;
 			break;
+		case DOWN:
+			posY += facing.getFrontOffsetY() * 0.01;
+			offsetY = 0;
+			switch(rotation) {
+			case 0:
+				posX += 1;
+				offsetX = -height;
+				offsetZ = width;
+				break;
+			case 1:
+				offsetX = width;
+				offsetZ = height;
+				break;
+			case 2:
+				posZ += 1;
+				offsetX = height;
+				offsetZ = -width;
+				break;
+			case 3:
+				posX += 1;
+				posZ += 1;
+				offsetX = -width;
+				offsetZ = -height;
+				break;
+			}
+			break;
+		case UP:
+			posY += facing.getFrontOffsetY() * 1.01;
+			offsetY = 0;
+			switch(rotation) {
+			case 3:
+				posX += 1;
+				offsetX = -width;
+				offsetZ = height;
+				break;
+			case 2:
+				posX += 1;
+				posZ += 1;
+				offsetX = -height;
+				offsetZ = -width;
+				break;
+			case 1:
+				posZ += 1;
+				offsetX = width;
+				offsetZ = -height;
+				break;
+			case 0:
+				offsetX = height;
+				offsetZ = width;
+				break;
+			}
+			break;
 		}
 		posX += offsetX / 2;
 		offsetX /= 2;
@@ -83,8 +139,9 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 		posZ += offsetZ / 2;
 		offsetZ /= 2;
 		this.setEntityBoundingBox(new AxisAlignedBB(posX - (offsetX == 0 ? 0.05 : offsetX), posY - (offsetY == 0 ? 0.05 : offsetY), posZ - (offsetZ == 0 ? 0.05 : offsetZ), posX + (offsetX == 0 ? 0.05 : offsetX), posY + (offsetY == 0 ? 0.05 : offsetY), posZ + (offsetZ == 0 ? 0.05 : offsetZ)));
-		this.rotationYaw = (float)(facing.getHorizontalIndex() * 90);
-		this.prevRotationYaw = this.rotationYaw;	
+		this.rotation = rotation;
+		this.framesRL = framesRL;
+		this.backRL = backRL;
 	}	
 
 	@Override
@@ -101,18 +158,16 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 		posX = compound.getDouble("posx");
 		posY = compound.getDouble("posy");
 		posZ = compound.getDouble("posz");
-		rotationYaw = compound.getFloat("rotationyaw");
-		rotationPitch = compound.getFloat("rotationpitch");
+		rotation = compound.getInteger("rotation");
 		facing = EnumFacing.getFront(compound.getByte("facing"));
 		index = compound.getInteger("index");
 		width = compound.getInteger("width");
 		height = compound.getInteger("height");
-		setEntityId(compound.getInteger("entityid"));
-		setUniqueId(compound.getUniqueId("uniqueid"));
-		if (compound.hasKey("CustomName", 8))
-			this.setCustomNameTag(compound.getString("CustomName"));
-		this.setAlwaysRenderNameTag(compound.getBoolean("CustomNameVisible"));
 		this.setEntityBoundingBox(new AxisAlignedBB(posX - (offsetX == 0 ? 0.05 : offsetX), posY - (offsetY == 0 ? 0.05 : offsetY), posZ - (offsetZ == 0 ? 0.05 : offsetZ), posX + (offsetX == 0 ? 0.05 : offsetX), posY + (offsetY == 0 ? 0.05 : offsetY), posZ + (offsetZ == 0 ? 0.05 : offsetZ)));
+		String s = compound.getString("frames");
+		framesRL = s.equals("") ? null : new ResourceLocation(s);
+		s = compound.getString("back");
+		backRL = s.equals("") ? null : new ResourceLocation(s);
 	}
 
 	@Override
@@ -123,17 +178,13 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 		compound.setDouble("posx", posX);
 		compound.setDouble("posy", posY);
 		compound.setDouble("posz", posZ);
-		compound.setFloat("rotationyaw", rotationYaw);
-		compound.setFloat("rotationpitch", rotationPitch);
+		compound.setInteger("rotation", rotation);
 		compound.setByte("facing", (byte)facing.getIndex());
 		compound.setInteger("index", index);
 		compound.setInteger("width", width);
 		compound.setInteger("height", height);
-		compound.setInteger("entityid", getEntityId());
-		compound.setUniqueId("uniqueid", getUniqueID());
-		if (this.getCustomNameTag() != null && !this.getCustomNameTag().isEmpty())
-			compound.setString("customname", this.getCustomNameTag());
-		compound.setBoolean("customnamevisible", this.getAlwaysRenderNameTag());
+		compound.setString("frames", framesRL == null ? "" : framesRL.toString());
+		compound.setString("back", backRL == null ? "" : backRL.toString());
 		return compound;
 	}
 
@@ -156,11 +207,12 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 			nbt.setInteger("index", index);
 			nbt.setByte("width", (byte)width);
 			nbt.setByte("height", (byte)height);
+			nbt.setString("frames", framesRL == null ? "" : framesRL.toString());
+			nbt.setString("back", backRL == null ? "" : backRL.toString());
 			photo.setTagCompound(nbt);
-			Vec3d a = new Vec3d(offsetX, 0, offsetZ);
-			Vec3d b = new Vec3d(0, offsetY, 0);
-			Vec3d c = a.crossProduct(b).normalize().scale(0.5);
-			EntityItem photoEntity = new EntityItem(worldObj, posX + c.xCoord, posY + c.yCoord, posZ + c.zCoord, photo);
+			Vec3d offset = new Vec3d(facing.getFrontOffsetX(), facing.getFrontOffsetY(), facing.getFrontOffsetZ());
+			offset.normalize().scale(0.5);
+			EntityItem photoEntity = new EntityItem(worldObj, posX + offset.xCoord, posY + offset.yCoord, posZ + offset.zCoord, photo);
 			photoEntity.motionX = 0;
 			photoEntity.motionY = 0;
 			photoEntity.motionZ = 0;
@@ -169,6 +221,11 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 			this.setDead();
 		}
 		return true;
+	}
+
+	@Override
+	public float getEyeHeight() {
+		return 0;
 	}
 
 	public boolean canBeCollidedWith() {
@@ -215,6 +272,21 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 		buffer.writeDouble(posZ);
 		buffer.writeInt(width);
 		buffer.writeInt(height);
+		buffer.writeInt(rotation);
+		if(framesRL == null)
+			buffer.writeInt(0);
+		else {
+			byte[] byteBuffer = framesRL.toString().getBytes();
+			buffer.writeInt(byteBuffer.length);
+			buffer.writeBytes(byteBuffer, 0, byteBuffer.length);
+		}
+		if(backRL == null)
+			buffer.writeInt(0);
+		else {
+			byte[] byteBuffer = backRL.toString().getBytes();
+			buffer.writeInt(byteBuffer.length);
+			buffer.writeBytes(byteBuffer, 0, byteBuffer.length);
+		}
 	}
 
 	@Override
@@ -229,7 +301,23 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 		posZ = buffer.readDouble();
 		width = buffer.readInt();
 		height = buffer.readInt();
+		rotation = buffer.readInt();
+		int l = buffer.readInt();
+		if(l > 0) {
+			String s;
+			byte[] byteBuffer = new byte[l];
+			buffer.readBytes(byteBuffer, 0, l);
+			framesRL = new ResourceLocation(new String(byteBuffer));
+		}
+		else framesRL = null;
+		l = buffer.readInt();
+		if(l > 0) {
+			String s;
+			byte[] byteBuffer = new byte[l];
+			buffer.readBytes(byteBuffer, 0, l);
+			backRL = new ResourceLocation(new String(byteBuffer));
+		}
+		else backRL = null;
 		this.setEntityBoundingBox(new AxisAlignedBB(posX - (offsetX == 0 ? 0.05 : offsetX), posY - (offsetY == 0 ? 0.05 : offsetY), posZ - (offsetZ == 0 ? 0.05 : offsetZ), posX + (offsetX == 0 ? 0.05 : offsetX), posY + (offsetY == 0 ? 0.05 : offsetY), posZ + (offsetZ == 0 ? 0.05 : offsetZ)));
-		this.rotationYaw = (float)(facing.getHorizontalIndex() * 90);
 	}
 }

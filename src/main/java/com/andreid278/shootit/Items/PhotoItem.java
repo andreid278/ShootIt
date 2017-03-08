@@ -12,6 +12,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -29,7 +30,11 @@ public class PhotoItem extends Item {
 				int index = compound.getInteger("index");
 				byte width = compound.getByte("width");
 				byte height = compound.getByte("height");
-				EntityPainting ep = new EntityPainting(worldIn, pos, facing, width, height, index);
+				String s = compound.getString("frames");
+				ResourceLocation framesRL = s.equals("") ? null : new ResourceLocation(s);
+				s = compound.getString("back");
+				ResourceLocation backRL = s.equals("") ? null : new ResourceLocation(s);
+				EntityPainting ep = new EntityPainting(worldIn, pos, facing, width, height, index, ((playerIn.getHorizontalFacing().getHorizontalIndex() + 1) * 3) % 4, framesRL, backRL);
 				worldIn.spawnEntityInWorld(ep);
 				if(!playerIn.isCreative()) {
 					stack.stackSize--;
