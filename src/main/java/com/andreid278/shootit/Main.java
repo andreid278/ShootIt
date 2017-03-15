@@ -32,7 +32,7 @@ import net.minecraftforge.fml.relauncher.Side;
 @Mod(modid = Main.MODID, version = Main.VERSION)
 public class Main {
 	public final static String MODID = "shootit";
-	public final static String VERSION = "v0.2";
+	public final static String VERSION = "v0.3";
 
 	@Instance(value = MODID)
 	public static Main instance;

@@ -1,5 +1,8 @@
 package com.andreid278.shootit.Network;
 
+import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
+
 import com.andreid278.shootit.CommonProxy;
 import com.andreid278.shootit.Main;
 import com.andreid278.shootit.TileEntities.TEPrinter;
@@ -25,12 +28,13 @@ public class MessagePrinterToServer implements IMessage {
 	public boolean increase;
 	public ResourceLocation framesRL;
 	public ResourceLocation backRL;
+	public double[] textureCoords;
 
 	public MessagePrinterToServer() {
 
 	}
 
-	public MessagePrinterToServer(byte messageID, int index, byte width, byte height, BlockPos pos, ResourceLocation framesRL, ResourceLocation backRL) {
+	public MessagePrinterToServer(byte messageID, int index, byte width, byte height, BlockPos pos, ResourceLocation framesRL, ResourceLocation backRL, double[] textureCoords) {
 		this.messageID = messageID;
 		this.index = index;
 		this.width = width;
@@ -40,6 +44,7 @@ public class MessagePrinterToServer implements IMessage {
 		posZ = pos.getZ();
 		this.framesRL = framesRL;
 		this.backRL = backRL;
+		this.textureCoords = textureCoords;
 	}
 
 	public MessagePrinterToServer(byte messageID, boolean increase, BlockPos pos) {
@@ -80,6 +85,9 @@ public class MessagePrinterToServer implements IMessage {
 				backRL = new ResourceLocation(new String(byteBuffer));
 			}
 			else backRL = null;
+			textureCoords = new double[4];
+			for(int i = 0; i < 4; i++)
+				textureCoords[i] = buf.readDouble();
 		}
 		else if(messageID == 1 || messageID == 2 || messageID == 3)
 			increase = buf.readBoolean();
@@ -109,6 +117,8 @@ public class MessagePrinterToServer implements IMessage {
 				buf.writeInt(byteBuffer.length);
 				buf.writeBytes(byteBuffer, 0, byteBuffer.length);
 			}
+			for(int i = 0; i < 4; i++)
+				buf.writeDouble(textureCoords[i]);
 		}
 		else if(messageID == 1 || messageID == 2 || messageID == 3)
 			buf.writeBoolean(increase);
@@ -132,6 +142,10 @@ public class MessagePrinterToServer implements IMessage {
 						compound.setByte("height", message.height);
 						compound.setString("frames", message.framesRL == null ? "" : message.framesRL.toString());
 						compound.setString("back", message.backRL == null ? "" : message.backRL.toString());
+						ByteBuffer byteBuffer = ByteBuffer.allocate(32);
+						DoubleBuffer doubleBuffer = byteBuffer.asDoubleBuffer();
+						doubleBuffer.put(message.textureCoords);
+						compound.setByteArray("textureCoords", byteBuffer.array());
 						stack.setTagCompound(compound);
 						if(((TEPrinter)tileEntity).getStackInSlot(6) == null) {
 							for(int i = 1; i < 6; i++) {
@@ -193,12 +207,8 @@ public class MessagePrinterToServer implements IMessage {
 						}
 						break;
 					case 4:
-						((TEPrinter)tileEntity).checkboxFrames = !((TEPrinter)tileEntity).checkboxFrames;
-						Main.network.sendTo(new MessagePrinterToClient(new BlockPos(message.posX, message.posY, message.posZ), (byte)3, ((TEPrinter)tileEntity).checkboxFrames), ctx.getServerHandler().playerEntity);							
-						break;
-					case 5:
-						((TEPrinter)tileEntity).checkboxBack = !((TEPrinter)tileEntity).checkboxBack;
-						Main.network.sendTo(new MessagePrinterToClient(new BlockPos(message.posX, message.posY, message.posZ), (byte)4, ((TEPrinter)tileEntity).checkboxBack), ctx.getServerHandler().playerEntity);							
+						((TEPrinter)tileEntity).checkboxCustom = !((TEPrinter)tileEntity).checkboxCustom;
+						Main.network.sendTo(new MessagePrinterToClient(new BlockPos(message.posX, message.posY, message.posZ), (byte)3, ((TEPrinter)tileEntity).checkboxCustom), ctx.getServerHandler().playerEntity);							
 						break;
 					}
 				}

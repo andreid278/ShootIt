@@ -48,7 +48,9 @@ public class PrinterGui extends GuiContainer {
 	public int curBack = 0;
 	public int curFrames = 0;
 
-	protected List<Checkbox> checkboxList = Lists.<Checkbox>newArrayList();
+	public Checkbox checkbox;
+
+	public GuiEditor guiEditor;
 
 	public PrinterGui(Container inventorySlotsIn) {
 		super(inventorySlotsIn);
@@ -75,8 +77,9 @@ public class PrinterGui extends GuiContainer {
 		this.buttonList.add(new TrueButtonGui(8, 130 + guiLeft, 105 + guiTop, 10, 18, ">"));
 
 		TEPrinter te = ((PrinterContainer)inventorySlots).te;
-//		checkboxList.add(new Checkbox(0, 10, 85, 10, 10, te.checkboxFrames, "Frames"));
-//		checkboxList.add(new Checkbox(1, 10, 110, 10, 10, te.checkboxBack, "Back"));
+		checkbox = new Checkbox(0, 180 + guiLeft, 145 + guiTop, 10, 10, te.checkboxCustom, "Custom");
+		//		checkboxList.add(new Checkbox(1, 10, 110, 10, 10, te.checkboxBack, "Back"));
+		guiEditor = new GuiEditor(181 + guiLeft, 11 + guiTop, 158, 108);
 
 		curFrames = 0;
 		framesRL.clear();
@@ -134,7 +137,8 @@ public class PrinterGui extends GuiContainer {
 						if(curIndex < array.length) {
 							drawCenteredStringWithoutShadow(mc.fontRendererObj, (curIndex + 1) + "/" + array.length, 260 + guiLeft, 127 + guiTop, 0);
 							if(Photos.photos.containsKey(array[curIndex]))
-								mc.getTextureManager().bindTexture(Photos.photos.get(array[curIndex]));
+								//								mc.getTextureManager().bindTexture(Photos.photos.get(array[curIndex]));
+								guiEditor.photoID = array[curIndex];
 							else {
 								if(Statics.imageIDToLoadFromServer == 0 && !mc.isSingleplayer()) {
 									Statics.imageIDToLoadFromServer = array[curIndex];
@@ -146,26 +150,36 @@ public class PrinterGui extends GuiContainer {
 										Photos.addPhoto(array[curIndex]);
 									else Photos.addEmptyPhoto(array[curIndex]);
 								}
-								mc.getTextureManager().bindTexture(Statics.LOADING);
+								//								mc.getTextureManager().bindTexture(Statics.LOADING);
+								guiEditor.photoID = 0;
 							}
 						}
 					}
 					else {
 						drawCenteredStringWithoutShadow(mc.fontRendererObj, "0/0", 260 + guiLeft, 127 + guiTop, 0);
-						mc.getTextureManager().bindTexture(Statics.NO_PHOTOS);
+						//						mc.getTextureManager().bindTexture(Statics.NO_PHOTOS);
+						guiEditor.photoID = -1;
 					}
 				}
 		}
 		else {
 			drawCenteredStringWithoutShadow(mc.fontRendererObj, "0/0", 260 + guiLeft, 127 + guiTop, 0);
-			mc.getTextureManager().bindTexture(Statics.NO_MEMORY_CARD);
+			//			mc.getTextureManager().bindTexture(Statics.NO_MEMORY_CARD);
+			guiEditor.photoID = -2;
 		}
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-		drawTexturedModalRect(181 + guiLeft, 11 + guiTop, 0, 0, 159, 109, 1, 1);
+		//		drawTexturedModalRect(181 + guiLeft, 11 + guiTop, 0, 0, 159, 109, 1, 1);
+		if(checkbox.check) {
+			guiEditor.isEnabled = true;
+			guiEditor.setPhotoSize(te.width, te.height);
+		}
+		else guiEditor.isEnabled = false;
+		guiEditor.draw(mc, mouseX, mouseY);
 		drawCenteredStringWithoutShadow(fontRendererObj, "Width = " + te.width, 100 + guiLeft, 12 + guiTop, 16777215);
 		drawCenteredStringWithoutShadow(fontRendererObj, "Height = " + te.height, 100 + guiLeft, 27 + guiTop, 16777215);
 		drawCenteredStringWithoutShadow(fontRendererObj, "Frame", 60 + guiLeft, 89 + guiTop, 0);
 		drawCenteredStringWithoutShadow(fontRendererObj, "Back", 60 + guiLeft, 110 + guiTop, 0);
+		checkbox.drawCheckbox(mc, mouseX, mouseY);
 	}
 
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
@@ -181,8 +195,6 @@ public class PrinterGui extends GuiContainer {
 			mc.getTextureManager().bindTexture(framesRL.get(curFrames));
 			drawTexturedModalRect(111, 84, 0, 0, 16, 16, 1, 1);
 		}
-		for(Checkbox checkbox : checkboxList)
-			checkbox.drawCheckbox(mc, mouseX, mouseY);
 		if(getSlotUnderMouse() == null)
 			return;
 		int slot = getSlotUnderMouse().slotNumber;
@@ -219,13 +231,15 @@ public class PrinterGui extends GuiContainer {
 						int[] array = itemStack.getTagCompound().getIntArray("indexes");
 						if(array.length > 0) {
 							int index = itemStack.getTagCompound().getIntArray("indexes")[((PrinterContainer)inventorySlots).te.curPhoto];
+							double textureCoords[] = guiEditor.getTextureCoords();
 							Main.network.sendToServer(new MessagePrinterToServer((byte)0,
-																				index,
-																				((PrinterContainer)inventorySlots).te.width,
-																				((PrinterContainer)inventorySlots).te.height,
-																				((PrinterContainer)inventorySlots).te.getPos(),
-																				framesRL.size() == 0 ? null : (curFrames < framesRL.size() ? framesRL.get(curFrames) : null),
-																				backRL.size() == 0 ? null : (curBack < backRL.size() ? backRL.get(curBack) : null)));
+									index,
+									((PrinterContainer)inventorySlots).te.width,
+									((PrinterContainer)inventorySlots).te.height,
+									((PrinterContainer)inventorySlots).te.getPos(),
+									framesRL.size() == 0 ? null : (curFrames < framesRL.size() ? framesRL.get(curFrames) : null),
+									backRL.size() == 0 ? null : (curBack < backRL.size() ? backRL.get(curBack) : null),
+									textureCoords));
 						}
 					}
 			break;
@@ -273,9 +287,20 @@ public class PrinterGui extends GuiContainer {
 
 	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
 		super.mouseClicked(mouseX, mouseY, mouseButton);
-		for(Checkbox checkbox : checkboxList)
-			if(checkbox.mousePressed(mc, mouseX - guiLeft, mouseY - guiTop)) {
-				Main.network.sendToServer(new MessagePrinterToServer((byte)(4 + checkbox.id), ((PrinterContainer)inventorySlots).te.getPos()));
-			}
+		guiEditor.mouseClicked(mouseX, mouseY, mouseButton);
+		if(checkbox.mousePressed(mc, mouseX, mouseY)) {
+			Main.network.sendToServer(new MessagePrinterToServer((byte)(4 + checkbox.id), ((PrinterContainer)inventorySlots).te.getPos()));
+		}
+	}
+	@Override
+	protected void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
+		super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+		guiEditor.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
+	}
+	
+	@Override
+	public void handleMouseInput() throws IOException {
+		super.handleMouseInput();
+		guiEditor.handleMouseInput();
 	}
 }

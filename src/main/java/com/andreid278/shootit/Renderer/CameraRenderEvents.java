@@ -71,6 +71,19 @@ public class CameraRenderEvents {
 					GlStateManager.popMatrix();
 
 					ItemStack camera = ep.getHeldItemMainhand();
+					NBTTagCompound nbt = camera.getTagCompound();
+					if(ep.ticksExisted % 10 == 0) {
+						if(nbt != null) {
+							int shader = nbt.getInteger("shader");
+							if(Statics.lastShader != shader) {
+								if(shader > 0)
+									mc.entityRenderer.loadShader(Statics.shaders.get(shader).rl);
+								else mc.entityRenderer.stopUseShader();
+								Statics.lastShader = shader;
+							}
+						}
+						else Statics.lastShader = 0;
+					}
 					if(Statics.isShooting) {
 						Statics.isShooting = false;
 
@@ -141,6 +154,11 @@ public class CameraRenderEvents {
 		if(Statics.fov != Statics.cameraFov) {
 			Statics.cameraFov = Statics.fov;
 			Minecraft.getMinecraft().gameSettings.fovSetting = Statics.fov;
+		}
+
+		if(Statics.lastShader > 0) {
+			mc.entityRenderer.stopUseShader();
+			Statics.lastShader = 0;
 		}
 	}
 }

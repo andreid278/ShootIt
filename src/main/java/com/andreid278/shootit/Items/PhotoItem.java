@@ -1,5 +1,8 @@
 package com.andreid278.shootit.Items;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
 import java.util.List;
 
 import com.andreid278.shootit.CommonProxy;
@@ -34,7 +37,19 @@ public class PhotoItem extends Item {
 				ResourceLocation framesRL = s.equals("") ? null : new ResourceLocation(s);
 				s = compound.getString("back");
 				ResourceLocation backRL = s.equals("") ? null : new ResourceLocation(s);
-				EntityPainting ep = new EntityPainting(worldIn, pos, facing, width, height, index, ((playerIn.getHorizontalFacing().getHorizontalIndex() + 1) * 3) % 4, framesRL, backRL);
+				byte[] byteArray = compound.getByteArray("textureCoords");
+				double[] textureCoords = new double[4];
+				if(byteArray.length == 0) {
+					textureCoords[0] = 0;
+					textureCoords[1] = 0;
+					textureCoords[2] = 1;
+					textureCoords[3] = 1;
+				}
+				else {
+					DoubleBuffer doubleBuffer = ByteBuffer.wrap(byteArray).asDoubleBuffer();
+					doubleBuffer.get(textureCoords);
+				}
+				EntityPainting ep = new EntityPainting(worldIn, pos, facing, width, height, index, ((playerIn.getHorizontalFacing().getHorizontalIndex() + 1) * 3) % 4, framesRL, backRL, textureCoords[0], textureCoords[1], textureCoords[2], textureCoords[3]);
 				worldIn.spawnEntityInWorld(ep);
 				if(!playerIn.isCreative()) {
 					stack.stackSize--;

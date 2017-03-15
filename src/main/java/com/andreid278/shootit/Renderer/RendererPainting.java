@@ -80,10 +80,10 @@ public class RendererPainting extends Render<EntityPainting> {
 			heightR = height - 1 / 10.0;
 		}
 		vertexbuffer.begin(7, DefaultVertexFormats.POSITION_TEX_NORMAL);
-		vertexbuffer.pos(widthR, heightR, 0.01).tex(1, 0).normal(0, 0, -1).endVertex();
-		vertexbuffer.pos(-widthR, heightR, 0.01).tex(0, 0).normal(0, 0, -1).endVertex();
-		vertexbuffer.pos(-widthR, -heightR, 0.01).tex(0, 1).normal(0, 0, -1).endVertex();
-		vertexbuffer.pos(widthR, -heightR, 0.01).tex(1, 1).normal(0, 0, -1).endVertex();
+		vertexbuffer.pos(widthR, heightR, 0.01).tex(entity.textureX2, entity.textureY1).normal(0, 0, -1).endVertex();
+		vertexbuffer.pos(-widthR, heightR, 0.01).tex(entity.textureX1, entity.textureY1).normal(0, 0, -1).endVertex();
+		vertexbuffer.pos(-widthR, -heightR, 0.01).tex(entity.textureX1, entity.textureY2).normal(0, 0, -1).endVertex();
+		vertexbuffer.pos(widthR, -heightR, 0.01).tex(entity.textureX2, entity.textureY2).normal(0, 0, -1).endVertex();
 		tessellator.draw();
 
 		if(entity.backRL == null)

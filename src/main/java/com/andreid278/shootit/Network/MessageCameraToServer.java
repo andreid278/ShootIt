@@ -3,6 +3,7 @@ package com.andreid278.shootit.Network;
 import com.andreid278.shootit.Main;
 import com.andreid278.shootit.Gui.GuiHandler;
 import com.andreid278.shootit.Items.Camera;
+import com.andreid278.shootit.Misc.Statics;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.item.ItemStack;
@@ -14,6 +15,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 public class MessageCameraToServer implements IMessage {
 	public byte messageID;
 	public boolean increase;
+	public int curShader;
 
 	public MessageCameraToServer() {
 
@@ -28,11 +30,18 @@ public class MessageCameraToServer implements IMessage {
 		this.messageID = messageID;
 	}
 
+	public MessageCameraToServer(byte messageID, int curShader) {
+		this.messageID = messageID;
+		this.curShader = curShader;
+	}
+
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		messageID = buf.readByte();
 		if(messageID == 0)
 			increase = buf.readBoolean();
+		else if(messageID == 3)
+			curShader = buf.readInt();
 	}
 
 	@Override
@@ -40,6 +49,8 @@ public class MessageCameraToServer implements IMessage {
 		buf.writeByte(messageID);
 		if(messageID == 0)
 			buf.writeBoolean(increase);
+		else if(messageID == 3)
+			buf.writeInt(curShader);
 	}
 
 	public static class Handler implements IMessageHandler<MessageCameraToServer, IMessage> {
@@ -74,6 +85,10 @@ public class MessageCameraToServer implements IMessage {
 						nbt.setInteger("curPhoto", 0);
 						item.setTagCompound(nbt);
 						break;
+					case 3:
+						nbt.setInteger("shader", message.curShader);
+						item.setTagCompound(nbt);
+						return new MessageCameraToClient((byte)2, message.curShader);
 					}
 				}
 			return null;

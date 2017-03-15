@@ -30,14 +30,14 @@ public class MessageCameraToClient implements IMessage {
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		messageID = buf.readByte();
-		if(messageID == 0 || messageID == 1)
+		if(messageID == 0 || messageID == 1 || messageID == 2)
 			curPhoto = buf.readInt();
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeByte(messageID);
-		if(messageID == 0 || messageID == 1)
+		if(messageID == 0 || messageID == 1 || messageID == 2)
 			buf.writeInt(curPhoto);
 	}
 

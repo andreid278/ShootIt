@@ -2,15 +2,22 @@ package com.andreid278.shootit.Misc;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import com.andreid278.shootit.Main;
 import com.google.common.io.Files;
+import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.resources.IResourceManager;
+import net.minecraft.client.shader.Framebuffer;
+import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ResourceLocation;
 
@@ -53,6 +60,7 @@ public class Statics {
 	public class ImageInfo {
 		public byte[] byteBuffer;
 		public int partLengthSum;
+		
 		public ImageInfo(int length) {
 			byteBuffer = new byte[length];
 			partLengthSum = 0;
@@ -67,6 +75,7 @@ public class Statics {
 		public byte[] byteBuffer;
 		public int index;
 		public int photoID;
+		
 		public ImageInfoToClient(int photoID) {
 			this.photoID = photoID;
 			index = 0;
@@ -78,6 +87,23 @@ public class Statics {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+		}
+	}
+	
+	public static int lastShader = 0;
+	public static List<ShaderInfo> shaders = new ArrayList<>();
+	public class ShaderInfo {
+		public String name;
+		public ResourceLocation rl;
+		
+		public ShaderInfo(String name, ResourceLocation rl) {
+			this.name = name;
+			this.rl = rl;
+		}
+		
+		public ShaderInfo(String name) {
+			this.name = name;
+			rl = null;
 		}
 	}
 }

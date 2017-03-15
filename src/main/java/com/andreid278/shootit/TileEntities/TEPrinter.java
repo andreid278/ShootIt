@@ -33,8 +33,7 @@ public class TEPrinter extends TileEntity implements IInventory {
 	public byte width;
 	public byte height;
 	public int curPhoto;
-	public boolean checkboxFrames;
-	public boolean checkboxBack;
+	public boolean checkboxCustom;
 	public PrinterContainer parent;
 
 	public TEPrinter() {
@@ -42,8 +41,7 @@ public class TEPrinter extends TileEntity implements IInventory {
 		width = 1;
 		height = 1;
 		curPhoto = 0;
-		checkboxFrames = false;
-		checkboxBack = false;
+		checkboxCustom = false;
 	}
 
 	public TEPrinter(PrinterContainer container) {
@@ -66,8 +64,7 @@ public class TEPrinter extends TileEntity implements IInventory {
 		compound.setByte("width", width);
 		compound.setByte("height", height);
 		compound.setInteger("curPhoto", curPhoto);
-		compound.setBoolean("frames", checkboxFrames);
-		compound.setBoolean("back", checkboxBack);
+		compound.setBoolean("custom", checkboxCustom);
 		return compound;
 	}
 
@@ -83,8 +80,7 @@ public class TEPrinter extends TileEntity implements IInventory {
 		width = compound.getByte("width");
 		height = compound.getByte("height");
 		curPhoto = compound.getInteger("curPhoto");
-		checkboxFrames = compound.getBoolean("frames");
-		checkboxBack = compound.getBoolean("back");
+		checkboxCustom = compound.getBoolean("custom");
 	}
 
 	public SPacketUpdateTileEntity getUpdatePacket() {

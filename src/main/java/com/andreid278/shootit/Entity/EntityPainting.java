@@ -1,5 +1,7 @@
 package com.andreid278.shootit.Entity;
 
+import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -40,12 +42,16 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 	public int rotation;
 	public ResourceLocation framesRL;
 	public ResourceLocation backRL;
+	public double textureX1;
+	public double textureY1;
+	public double textureX2;
+	public double textureY2;
 
 	public EntityPainting(World worldIn) {
 		super(worldIn);
 	}
 
-	public EntityPainting(World worldIn, BlockPos bp, EnumFacing facing, int width, int height, int index, int rotation, ResourceLocation framesRL, ResourceLocation backRL) {
+	public EntityPainting(World worldIn, BlockPos bp, EnumFacing facing, int width, int height, int index, int rotation, ResourceLocation framesRL, ResourceLocation backRL, double textureX1, double textureY1, double textureX2, double textureY2) {
 		super(worldIn);
 		this.posX = bp.getX() + facing.getFrontOffsetX() * 1.01;
 		this.posY = bp.getY();
@@ -142,6 +148,14 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 		this.rotation = rotation;
 		this.framesRL = framesRL;
 		this.backRL = backRL;
+		this.textureX1 = textureX1;
+		this.textureY1 = textureY1;
+		this.textureX2 = textureX2;
+		this.textureY2 = textureY2;
+		if(textureX2 == 0)
+			this.textureX2 = 1;
+		if(textureY2 == 0)
+			this.textureY2 = 1;
 	}	
 
 	@Override
@@ -168,6 +182,14 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 		framesRL = s.equals("") ? null : new ResourceLocation(s);
 		s = compound.getString("back");
 		backRL = s.equals("") ? null : new ResourceLocation(s);
+		textureX1 = compound.getDouble("textureX1");
+		textureY1 = compound.getDouble("textureY1");
+		textureX2 = compound.getDouble("textureX2");
+		textureY2 = compound.getDouble("textureY2");
+		if(textureX2 == 0)
+			textureX2 = 1;
+		if(textureY2 == 0)
+			textureY2 = 1;
 	}
 
 	@Override
@@ -185,6 +207,10 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 		compound.setInteger("height", height);
 		compound.setString("frames", framesRL == null ? "" : framesRL.toString());
 		compound.setString("back", backRL == null ? "" : backRL.toString());
+		compound.setDouble("textureX1", textureX1);
+		compound.setDouble("textureY1", textureY1);
+		compound.setDouble("textureX2", textureX2);
+		compound.setDouble("textureY2", textureY2);
 		return compound;
 	}
 
@@ -209,6 +235,15 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 			nbt.setByte("height", (byte)height);
 			nbt.setString("frames", framesRL == null ? "" : framesRL.toString());
 			nbt.setString("back", backRL == null ? "" : backRL.toString());
+			double[] textureCoords = new double[4];
+			textureCoords[0] = textureX1;
+			textureCoords[1] = textureY1;
+			textureCoords[2] = textureX2;
+			textureCoords[3] = textureY2;
+			ByteBuffer byteBuffer = ByteBuffer.allocate(32);
+			DoubleBuffer doubleBuffer = byteBuffer.asDoubleBuffer();
+			doubleBuffer.put(textureCoords);
+			nbt.setByteArray("textureCoords", byteBuffer.array());
 			photo.setTagCompound(nbt);
 			Vec3d offset = new Vec3d(facing.getFrontOffsetX(), facing.getFrontOffsetY(), facing.getFrontOffsetZ());
 			offset.normalize().scale(0.5);
@@ -287,6 +322,10 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 			buffer.writeInt(byteBuffer.length);
 			buffer.writeBytes(byteBuffer, 0, byteBuffer.length);
 		}
+		buffer.writeDouble(textureX1);
+		buffer.writeDouble(textureY1);
+		buffer.writeDouble(textureX2);
+		buffer.writeDouble(textureY2);
 	}
 
 	@Override
@@ -318,6 +357,10 @@ public class EntityPainting extends Entity implements IEntityAdditionalSpawnData
 			backRL = new ResourceLocation(new String(byteBuffer));
 		}
 		else backRL = null;
+		textureX1 = buffer.readDouble();
+		textureY1 = buffer.readDouble();
+		textureX2 = buffer.readDouble();
+		textureY2 = buffer.readDouble();
 		this.setEntityBoundingBox(new AxisAlignedBB(posX - (offsetX == 0 ? 0.05 : offsetX), posY - (offsetY == 0 ? 0.05 : offsetY), posZ - (offsetZ == 0 ? 0.05 : offsetZ), posX + (offsetX == 0 ? 0.05 : offsetX), posY + (offsetY == 0 ? 0.05 : offsetY), posZ + (offsetZ == 0 ? 0.05 : offsetZ)));
 	}
 }

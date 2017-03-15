@@ -24,6 +24,7 @@ import com.andreid278.shootit.Network.MessagePrinterToClient;
 import com.andreid278.shootit.Renderer.CameraRenderEvents;
 import com.andreid278.shootit.Renderer.RendererPainting;
 import com.andreid278.shootit.TileEntities.TEPrinter;
+import com.google.gson.JsonSyntaxException;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -36,6 +37,7 @@ import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.resources.FolderResourcePack;
 import net.minecraft.client.resources.IResourcePack;
+import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -127,6 +129,15 @@ public class ClientProxy extends CommonProxy {
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event) {
 		super.postInit(event);
+		Minecraft mc = Minecraft.getMinecraft();
+		Statics.shaders.add(Statics.instance.new ShaderInfo("No filter"));
+		Statics.shaders.add(Statics.instance.new ShaderInfo("Gray", new ResourceLocation("minecraft", "shaders/post/gray.json")));
+//		Statics.shaders.add(Statics.instance.new ShaderInfo("Black and white", new ResourceLocation("minecraft", "shaders/post/blackandwhite.json")));
+		Statics.shaders.add(Statics.instance.new ShaderInfo("Red", new ResourceLocation("minecraft", "shaders/post/red.json")));
+		Statics.shaders.add(Statics.instance.new ShaderInfo("Green", new ResourceLocation("minecraft", "shaders/post/green.json")));
+		Statics.shaders.add(Statics.instance.new ShaderInfo("Blue", new ResourceLocation("minecraft", "shaders/post/blue.json")));
+//		Statics.shaders.add(Statics.instance.new ShaderInfo("Canny", new ResourceLocation("minecraft", "shaders/post/canny.json")));
+//		Statics.shaders.add(Statics.instance.new ShaderInfo("Blur", new ResourceLocation("minecraft", "shaders/post/myblur.json")));
 	}
 
 	public void registerItemsModels() {
@@ -146,9 +157,7 @@ public class ClientProxy extends CommonProxy {
 				if(message.id < 3)
 					((TEPrinter) te).setField(message.id, message.value);
 				else if(message.id == 3)
-					((TEPrinter)te).checkboxFrames = message.checkbox;
-				else if(message.id == 4)
-					((TEPrinter)te).checkboxBack = message.checkbox;
+					((TEPrinter)te).checkboxCustom = message.checkbox;
 				else if(message.id == 5 || message.id == 6) {
 					if(Minecraft.getMinecraft().currentScreen instanceof PrinterGui) {
 						PrinterGui gui = (PrinterGui) Minecraft.getMinecraft().currentScreen;
@@ -303,6 +312,10 @@ public class ClientProxy extends CommonProxy {
 					case 1:
 						nbt.setIntArray("indexes", ArrayUtils.removeElement(nbt.getIntArray("indexes"), message.curPhoto));
 						nbt.setInteger("curPhoto", 0);
+						item.setTagCompound(nbt);
+						break;
+					case 2:
+						nbt.setInteger("shader", message.curPhoto);
 						item.setTagCompound(nbt);
 						break;
 					}
