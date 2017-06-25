@@ -4,6 +4,8 @@ item.photoitem.name=Photo
 
 tile.printer.name=Printer
 
+tile.painter.name=Painter
+
 itemGroup.shootit=ShootIt
 
 entity.shootit.photo.name=Photo

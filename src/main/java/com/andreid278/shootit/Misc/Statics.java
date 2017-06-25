@@ -33,6 +33,8 @@ public class Statics {
 	public static final ResourceLocation CAMERA_MODEL_RL = new ResourceLocation(Main.MODID, "models/item/camera.obj");
 	public static final ResourceLocation CAMERA_FIRST_VIEW = new ResourceLocation(Main.MODID, "textures/camerafirstview.png");
 	public static final ResourceLocation PHOTO_BACK = new ResourceLocation(Main.MODID, "textures/photoback.png");
+	public static final ResourceLocation TRANSPARENCY = new ResourceLocation(Main.MODID, "textures/transparency.png");
+	public static final ResourceLocation PAINTER_GUI = new ResourceLocation(Main.MODID, "textures/paintergui.png");
 	
 	public static String slash = "\\";
 	

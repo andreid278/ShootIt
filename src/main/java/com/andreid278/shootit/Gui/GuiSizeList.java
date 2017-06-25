@@ -22,16 +22,16 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.util.math.MathHelper;
 
-public class GuiShadersList extends GuiList {
-	public CameraGui owner;
+public class GuiSizeList extends GuiList {
+	public PainterGui owner;
 	public List<GuiListEntry> list = new ArrayList<>();
 	
-	public GuiShadersList(CameraGui owner, Minecraft mcIn, int left, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn) {
+	public GuiSizeList(PainterGui owner, Minecraft mcIn, int left, int widthIn, int heightIn, int topIn, int bottomIn, int slotHeightIn) {
 		super(mcIn, left, widthIn, heightIn, topIn, bottomIn, slotHeightIn);
 		this.owner = owner;
-		for(ShaderInfo shader : Statics.shaders)
-			list.add(new GuiListEntry(shader.name, 16777215));
-		selectedSlot = owner.curShader;
+		for(int i = 1; i < 25; i++)
+			list.add(new GuiListEntry(String.valueOf(i), 0));
+		selectedSlot = 0;
 	}
 
 	@Override
@@ -46,12 +46,13 @@ public class GuiShadersList extends GuiList {
 	
 	@Override
 	public void slotClicked(int slot) {
-		owner.curShader = slot;
-		Main.network.sendToServer(new MessageCameraToServer((byte)3, slot));
+//		owner.curShader = slot;
+//		Main.network.sendToServer(new MessageCameraToServer((byte)3, slot));
+		owner.photoEditor.size = Integer.parseInt(((GuiListEntry)this.getListEntry(selectedSlot)).text);
 	}
 
 	@Override
 	public String getHeaderName() {
-		return "Filters";
+		return "Size";
 	}
 }

@@ -23,12 +23,14 @@ import net.minecraft.util.ResourceLocation;
 public class ConfirmSavingPhotoGui extends GuiScreen {
 	public ItemStack camera;
 	public ResourceLocation rl;
+	boolean isClosed;
 
 	public ConfirmSavingPhotoGui(ItemStack heldItemMainhand) {
 		camera = heldItemMainhand;
 	}
 
 	public void initGui() {
+		isClosed = false;
 		Statics.imageIDToLoadToServer = -1;
 		this.buttonList.clear();
 		this.buttonList.add(new TrueButtonGui(0, (int)(width * 224 / 256.0), (int)(height * 50 / 150.0), (int)(width * 20 / 256.0), (int)(height * 15 / 150.0), "Yes"));
@@ -89,6 +91,7 @@ public class ConfirmSavingPhotoGui extends GuiScreen {
 	protected void actionPerformed(GuiButton button) throws IOException {
 		switch (button.id) {
 		case 0:
+			isClosed = true;
 			File file = new File(Statics.photosFolderPathClient + "/0.png");
 			if(file.exists()) {
 				Main.network.sendToServer(new MessageRequestForNextPhotoID());
@@ -99,9 +102,16 @@ public class ConfirmSavingPhotoGui extends GuiScreen {
 			}
 			break;
 		case 1:
+			isClosed = true;
 			Statics.imageIDToLoadToServer = 0;
 			this.mc.displayGuiScreen((GuiScreen)null);
 			break;
 		}
+	}
+
+	public void onGuiClosed()
+	{
+		if(!isClosed)
+			Statics.imageIDToLoadToServer = 0;
 	}
 }

@@ -3,6 +3,7 @@ package com.andreid278.shootit.Network;
 import java.io.File;
 import java.io.IOException;
 
+import com.andreid278.shootit.Gui.ConfirmSavingPhotoGui;
 import com.andreid278.shootit.Misc.Photos;
 import com.andreid278.shootit.Misc.Statics;
 
@@ -57,7 +58,8 @@ public class MessageReplyForNextPhotoID implements IMessage {
 				else {
 					System.out.println("Can't save this photo!!!");
 				}
-				Minecraft.getMinecraft().displayGuiScreen((GuiScreen)null);
+				if(Minecraft.getMinecraft().currentScreen instanceof ConfirmSavingPhotoGui)
+					Minecraft.getMinecraft().displayGuiScreen((GuiScreen)null);
 				break;
 			case 1:
 				Statics.imageIDToLoadToServer = 0;

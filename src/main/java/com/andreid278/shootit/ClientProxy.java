@@ -19,10 +19,12 @@ import com.andreid278.shootit.Misc.Photos;
 import com.andreid278.shootit.Misc.Statics;
 import com.andreid278.shootit.Network.MessageCameraToClient;
 import com.andreid278.shootit.Network.MessageDeletePhotoToClients;
+import com.andreid278.shootit.Network.MessagePainterToClient;
 import com.andreid278.shootit.Network.MessagePlayerLoggedIn;
 import com.andreid278.shootit.Network.MessagePrinterToClient;
 import com.andreid278.shootit.Renderer.CameraRenderEvents;
 import com.andreid278.shootit.Renderer.RendererPainting;
+import com.andreid278.shootit.TileEntities.TEPainter;
 import com.andreid278.shootit.TileEntities.TEPrinter;
 import com.google.gson.JsonSyntaxException;
 
@@ -147,6 +149,8 @@ public class ClientProxy extends CommonProxy {
 		ModelLoader.setCustomModelResourceLocation(photoItem, 0, new ModelResourceLocation(Main.MODID + ":photoitem", "inventory"));
 		Item itemPrinter = Item.getItemFromBlock(printer);
 		ModelLoader.setCustomModelResourceLocation(itemPrinter, 0, new ModelResourceLocation(Main.MODID + ":printer", "inventory"));
+		Item itemPainter = Item.getItemFromBlock(painter);
+		ModelLoader.setCustomModelResourceLocation(itemPainter, 0, new ModelResourceLocation(Main.MODID + ":painter", "inventory"));
 	}
 
 	public IMessage onMessage(MessagePrinterToClient message, MessageContext ctx) {
@@ -206,7 +210,18 @@ public class ClientProxy extends CommonProxy {
 			}
 		return null;
 	}
-
+	
+	public IMessage onMessage(MessagePainterToClient message, MessageContext ctx) {
+		World world = Minecraft.getMinecraft().theWorld;
+		TileEntity te = world.getTileEntity(message.pos);
+		if(te != null)
+			if(te instanceof TEPainter) {
+				if(message.id == 0)
+					((TEPainter) te).curPhoto = message.value;
+			}
+		return null;
+	}
+	
 	public IMessage onMessage(MessagePlayerLoggedIn message, MessageContext ctx) {
 		Statics.isShooting = false;
 		if(!Minecraft.getMinecraft().isSingleplayer()) {

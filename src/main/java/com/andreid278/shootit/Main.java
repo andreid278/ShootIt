@@ -5,6 +5,8 @@ import com.andreid278.shootit.Network.MessageCameraToClient;
 import com.andreid278.shootit.Network.MessageCameraToServer;
 import com.andreid278.shootit.Network.MessageDeletePhotoRequest;
 import com.andreid278.shootit.Network.MessageDeletePhotoToClients;
+import com.andreid278.shootit.Network.MessagePainterToClient;
+import com.andreid278.shootit.Network.MessagePainterToServer;
 import com.andreid278.shootit.Network.MessagePlayerLoggedIn;
 import com.andreid278.shootit.Network.MessagePrinterToServer;
 import com.andreid278.shootit.Network.MessageReplyForNextPhotoID;
@@ -62,6 +64,8 @@ public class Main {
 		network.registerMessage(MessageCameraToClient.Handler.class, MessageCameraToClient.class, 11, Side.CLIENT);
 		network.registerMessage(MessageDeletePhotoRequest.Handler.class, MessageDeletePhotoRequest.class, 12, Side.SERVER);
 		network.registerMessage(MessageDeletePhotoToClients.Handler.class, MessageDeletePhotoToClients.class, 13, Side.CLIENT);
+		network.registerMessage(MessagePainterToServer.Handler.class, MessagePainterToServer.class, 14, Side.SERVER);
+		network.registerMessage(MessagePainterToClient.Handler.class, MessagePainterToClient.class, 15, Side.CLIENT);
 	}
 
 	@EventHandler

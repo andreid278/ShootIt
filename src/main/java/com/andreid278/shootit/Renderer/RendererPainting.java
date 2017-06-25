@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.VertexBuffer;
 import net.minecraft.client.renderer.entity.Render;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
@@ -35,6 +36,8 @@ public class RendererPainting extends Render<EntityPainting> {
 	}
 
 	public void doRender(EntityPainting entity, double x, double y, double z, float entityYaw, float partialTicks) {
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GlStateManager.pushMatrix();
 		GlStateManager.translate(x, y, z);
 		
@@ -168,6 +171,12 @@ public class RendererPainting extends Render<EntityPainting> {
 		}
 		
 		GlStateManager.popMatrix();
+		GL11.glDisable(GL11.GL_BLEND);
 		super.doRender(entity, x, y, z, entityYaw, partialTicks);
+	}
+	
+	@Override
+	public void doRenderShadowAndFire(Entity entityIn, double x, double y, double z, float yaw, float partialTicks) {
+		
 	}
 }

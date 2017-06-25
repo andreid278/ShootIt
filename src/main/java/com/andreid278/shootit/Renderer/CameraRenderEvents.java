@@ -76,8 +76,9 @@ public class CameraRenderEvents {
 						if(nbt != null) {
 							int shader = nbt.getInteger("shader");
 							if(Statics.lastShader != shader) {
-								if(shader > 0)
+								if(shader > 0) {
 									mc.entityRenderer.loadShader(Statics.shaders.get(shader).rl);
+								}
 								else mc.entityRenderer.stopUseShader();
 								Statics.lastShader = shader;
 							}

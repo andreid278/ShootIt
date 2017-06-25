@@ -2,8 +2,10 @@ package com.andreid278.shootit.Gui;
 
 import com.andreid278.shootit.Containers.CameraContainer;
 import com.andreid278.shootit.Containers.CameraInventory;
+import com.andreid278.shootit.Containers.PainterContainer;
 import com.andreid278.shootit.Containers.PrinterContainer;
 import com.andreid278.shootit.Items.Camera;
+import com.andreid278.shootit.TileEntities.TEPainter;
 import com.andreid278.shootit.TileEntities.TEPrinter;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,6 +20,7 @@ public class GuiHandler implements IGuiHandler {
 	public static final int PRINTER_GUI = 1;
 	public static final int CAMERA_GUI = 2;
 	public static final int CAMERA_INVENTORY_GUI = 3;
+	public static final int PAINTER_GUI = 4;
 
 	@Override
 	public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
@@ -30,6 +33,8 @@ public class GuiHandler implements IGuiHandler {
 			break;
 		case CAMERA_INVENTORY_GUI:
 			return new CameraContainer(player.inventory, new CameraInventory(player.getHeldItemMainhand()));
+		case PAINTER_GUI:
+			return new PainterContainer(player.inventory, (TEPainter)world.getTileEntity(new BlockPos(x, y, z)));
 		}
 		return null;
 	}
@@ -48,6 +53,8 @@ public class GuiHandler implements IGuiHandler {
 			return new CameraGui();
 		case CAMERA_INVENTORY_GUI:
 			return new CameraInventoryGui(new CameraContainer(player.inventory, new CameraInventory(player.getHeldItemMainhand())));
+		case PAINTER_GUI:
+			return new PainterGui(player.inventory, (TEPainter)world.getTileEntity(new BlockPos(x, y, z)));
 		}
 		return null;
 	}

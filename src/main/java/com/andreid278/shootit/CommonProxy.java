@@ -1,5 +1,6 @@
 package com.andreid278.shootit;
 
+import com.andreid278.shootit.Blocks.BlockPainter;
 import com.andreid278.shootit.Blocks.BlockPrinter;
 import com.andreid278.shootit.Entity.EntityPainting;
 import com.andreid278.shootit.Events.PlayerEvents;
@@ -10,8 +11,10 @@ import com.andreid278.shootit.Items.PhotoItem;
 import com.andreid278.shootit.Misc.Statics;
 import com.andreid278.shootit.Network.MessageCameraToClient;
 import com.andreid278.shootit.Network.MessageDeletePhotoToClients;
+import com.andreid278.shootit.Network.MessagePainterToClient;
 import com.andreid278.shootit.Network.MessagePlayerLoggedIn;
 import com.andreid278.shootit.Network.MessagePrinterToClient;
+import com.andreid278.shootit.TileEntities.TEPainter;
 import com.andreid278.shootit.TileEntities.TEPrinter;
 
 import net.minecraft.block.material.Material;
@@ -60,6 +63,7 @@ public class CommonProxy {
 	@EventHandler
 	public void init(FMLInitializationEvent event) {
 		GameRegistry.registerTileEntity(TEPrinter.class, "teprinter");
+		GameRegistry.registerTileEntity(TEPainter.class, "tepainter");
 		NetworkRegistry.INSTANCE.registerGuiHandler(Main.instance, new GuiHandler());
 		registerRecipes();
 	}
@@ -73,6 +77,7 @@ public class CommonProxy {
 	public static MemoryCard memoryCard;
 	public static PhotoItem photoItem;
 	public static BlockPrinter printer;
+	public static BlockPainter painter;
 	private void registerItems() {
 		camera = new Camera();
 		GameRegistry.register(camera);
@@ -83,18 +88,26 @@ public class CommonProxy {
 		printer = new BlockPrinter(Material.IRON);
 		GameRegistry.register(printer);
 		GameRegistry.register(new ItemBlock(printer).setRegistryName(printer.getRegistryName()));
+		painter = new BlockPainter(Material.IRON);
+		GameRegistry.register(painter);
+		GameRegistry.register(new ItemBlock(painter).setRegistryName(painter.getRegistryName()));
 	}
 
 	private void registerRecipes() {
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(camera), "A B", "CDC", "CCC", 'A', Items.REDSTONE, 'B', Blocks.STONE_BUTTON, 'C', Items.IRON_INGOT, 'D', "blockGlass"));
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(memoryCard), "AB ", "BCB", "BBB", 'A', Items.REDSTONE, 'B', Items.IRON_INGOT, 'C', "gemDiamond"));
 		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(printer), "ABA", "ACD", "AAA", 'A', Items.IRON_INGOT, 'B', "blockGlass", 'C', Items.REDSTONE, 'D', "dye"));
+		GameRegistry.addRecipe(new ShapedOreRecipe(new ItemStack(painter), "BBB", "ACA", "A A", 'A', Items.IRON_INGOT, 'B', "blockGlass", 'C', photoItem));
 	}
 
 	public IMessage onMessage(MessagePrinterToClient message, MessageContext ctx) {
 		return null;
 	}
-
+	
+	public IMessage onMessage(MessagePainterToClient message, MessageContext ctx) {
+		return null;
+	}
+	
 	public IMessage onMessage(MessagePlayerLoggedIn message, MessageContext ctx) {
 		return null;
 	}

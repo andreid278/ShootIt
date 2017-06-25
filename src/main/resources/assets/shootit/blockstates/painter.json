@@ -1,0 +1,20 @@
+{
+	"forge_marker": 1,
+	"defaults" : {
+		"model": "shootit:painter"
+	},
+	"variants": {
+		"facing": {
+			"up": { "model": "shootit:painter" },
+			"down": { "model": "shootit:painter" },
+			"north": { "model": "shootit:painter" },
+			"south": { "model": "shootit:painter", "y": 180 },
+			"west":  { "model": "shootit:painter", "y": 270 },
+			"east":  { "model": "shootit:painter", "y": 90 }
+		},
+		"normal": [{}],
+        "inventory": [{
+			"transform": "forge:default-block"
+		}]
+    }
+}
