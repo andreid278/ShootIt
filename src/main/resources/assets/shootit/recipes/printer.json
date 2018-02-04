@@ -1,0 +1,28 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "ABA",
+        "ACD",
+        "AAA"
+    ],
+    "key": {
+        "A": {
+            "item": "minecraft:iron_ingot"
+        },
+        "B": {
+			"type" : "forge:ore_dict",
+			"ore" : "blockGlass"
+        },
+        "C": {
+            "item": "minecraft:redstone"
+        },
+        "D": {
+			"type" : "forge:ore_dict",
+			"ore" : "dye"
+		}
+    },
+    "result": {
+        "item": "shootit:printer",
+        "count": 1
+    }
+}

@@ -6,6 +6,6 @@ tile.printer.name=Printer
 
 tile.painter.name=Painter
 
-itemGroup.shootit=ShootIt
+itemGroup.ShootIt=ShootIt
 
-entity.shootit.photo.name=Photo
+entity.photo.name=Photo

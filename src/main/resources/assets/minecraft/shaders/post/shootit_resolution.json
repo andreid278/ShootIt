@@ -1,0 +1,17 @@
+{
+	"targets": [
+		"temp"
+	],
+	"passes": [
+		{
+			"name": "shootit_resolution",
+			"intarget": "minecraft:main",
+			"outtarget": "temp"
+		},
+		{
+            "name": "shootit_resolution2",
+            "intarget": "temp",
+            "outtarget": "minecraft:main"
+        }
+	]
+}

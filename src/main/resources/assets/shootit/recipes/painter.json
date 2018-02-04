@@ -1,0 +1,24 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "BBB",
+        "ACA",
+        "A A"
+    ],
+    "key": {
+        "A": {
+            "item": "minecraft:iron_ingot"
+        },
+        "B": {
+			"type" : "forge:ore_dict",
+			"ore" : "blockGlass"
+        },
+        "C": {
+            "item": "shootit:photoitem"
+        }
+	},
+    "result": {
+        "item": "shootit:painter",
+        "count": 1
+    }
+}

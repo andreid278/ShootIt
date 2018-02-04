@@ -1,0 +1,16 @@
+[
+{
+  "modid": "shootit",
+  "name": "ShootIt",
+  "description": "This mod is about photography",
+  "version": "0.1",
+  "mcversion": "1.12.2",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["andreid278"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
