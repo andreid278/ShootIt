@@ -1,0 +1,17 @@
+{
+	"targets": [
+		"swap"
+	],
+	"passes": [
+		{
+			"name": "shootit_posterization",
+			"intarget": "minecraft:main",
+			"outtarget": "swap"
+		},
+		{
+			"name": "blit",
+			"intarget": "swap",
+			"outtarget": "minecraft:main"
+		}
+	]
+}

@@ -96,7 +96,7 @@ public abstract class GuiList extends GuiListExtended {
 				int l2 = this.mouseY - this.top;
 				int i1 = l2 / this.slotHeight + (int)amountScrolled;
 
-				if (i1 < this.getSize() && this.mouseX >= j2 && this.mouseX < k2 && i1 >= 0 && l2 >= 0 && initialClickY == -1) {
+				/*if (i1 < this.getSize() && this.mouseX >= j2 && this.mouseX < k2 && i1 >= 0 && l2 >= 0 && initialClickY == -1) {
 					boolean flag = i1 == this.selectedElement && Minecraft.getSystemTime() - this.lastClicked < 250L;
 					this.elementClicked(i1, flag, this.mouseX, this.mouseY);
 					this.selectedElement = i1;
@@ -105,7 +105,7 @@ public abstract class GuiList extends GuiListExtended {
 				}
 				else if(this.mouseX >= j2 && this.mouseX <= k2 && l2 < 0 && initialClickY == -1) {
 					flag1 = false;
-				}
+				}*/
 
 				int i3 = this.getScrollBarX();
 				int j1 = i3 + 6;
@@ -138,6 +138,7 @@ public abstract class GuiList extends GuiListExtended {
 				}
 
 				this.amountScrolled += i2;
+				this.bindAmountScrolled();
 			}
 		}
 	}
@@ -268,5 +269,10 @@ public abstract class GuiList extends GuiListExtended {
 	@Override
 	protected void drawListHeader(int insideLeft, int insideTop, Tessellator tessellatorIn) {
 		mc.fontRenderer.drawString(headerName, insideLeft, insideTop - headerPadding, 16711680, false);
+	}
+	
+	public void scrollTo(int slot) {
+		this.amountScrolled = slot;
+		this.bindAmountScrolled();
 	}
 }

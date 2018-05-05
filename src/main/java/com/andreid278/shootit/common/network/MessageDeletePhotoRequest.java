@@ -6,6 +6,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import com.andreid278.shootit.ShootIt;
 import com.andreid278.shootit.common.MCData;
+import com.andreid278.shootit.common.container.CameraContainer;
 import com.andreid278.shootit.common.item.Camera;
 
 import io.netty.buffer.ByteBuf;
@@ -57,6 +58,10 @@ public class MessageDeletePhotoRequest implements IMessage {
 						if(file.exists())
 							file.delete();
 						ShootIt.network.sendToAll(new MessageDeletePhotoToClients(message.photoID));
+					}
+					if(ctx.getServerHandler().player.openContainer instanceof CameraContainer) {
+						CameraContainer container = (CameraContainer) ctx.getServerHandler().player.openContainer;
+						container.cameraInventory.readFromNBT(nbt);
 					}
 					return new MessageCameraToClient((byte)1, message.photoID);
 				}

@@ -5,7 +5,7 @@
         "dstrgb": "zero"
     },
     "vertex": "sobel",
-    "fragment": "shootit_resolution2",
+    "fragment": "shootit_contrast",
     "attributes": [ "Position" ],
         "samplers": [
         { "name": "DiffuseSampler" }
@@ -13,6 +13,7 @@
     "uniforms": [
         { "name": "ProjMat",    "type": "matrix4x4", "count": 16, "values": [ 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 ] },
         { "name": "OutSize",    "type": "float",     "count": 2,  "values": [ 1.0, 1.0 ] },
-        { "name": "Radius",     "type": "float",     "count": 1,  "values": [ 5.0 ] }
+        { "name": "Contrast",   "type": "float",     "count": 1,  "values": [ 1.0 ] },
+        { "name": "Brightness", "type": "float",     "count": 1,  "values": [ 1.0 ] }
 	]
 }

@@ -30,7 +30,6 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.TextFormatting;
 
 public class CameraGui extends GuiContainer implements IContainerListener {
-	public GuiFiltersList filters;
 	public int curShader;
 	
 	public int curPhoto;
@@ -50,17 +49,13 @@ public class CameraGui extends GuiContainer implements IContainerListener {
 
 		buttonList.add(new TrueButtonGui(0, width / 2 - 72, height / 2 - 10, 10, 20, "<"));
 		buttonList.add(new TrueButtonGui(1, width / 2 + 150, height / 2 - 10, 10, 20, ">"));
-		buttonList.add(new TrueButtonGui(2, width / 2 - 72, height / 2 - 90, 20, 20, Resources.FILTERS, 64, 192));
-		buttonList.add(new TrueButtonGui(3, width / 2 + 140, height / 2 - 90, 20, 20, Resources.DELETE, 64, 192));
+		buttonList.add(new TrueButtonGui(2, width / 2 + 140, height / 2 - 90, 20, 20, Resources.DELETE, 64, 192));
 
 		curShader = 0;
 		ItemStack item = mc.player.getHeldItemMainhand();
 		if(item.getItem() instanceof Camera)
 			if(item.hasTagCompound())
 				curShader = item.getTagCompound().getInteger("shader");
-
-		filters = new GuiFiltersList(this, mc, width / 2 - 50, height / 2 - 90, 100, 75, 15, "");
-		filters.setVisible(false);
 	}
 	
 	@Override
@@ -128,8 +123,6 @@ public class CameraGui extends GuiContainer implements IContainerListener {
 				}
 			}
 		}
-
-		filters.drawScreen(mouseX, mouseY, partialTicks);
 	}
 
 	public void drawTexturedModalRect(double x, double y, double textureX, double textureY, double width, double height, double textureWidth, double textureHeight) {
@@ -158,7 +151,7 @@ public class CameraGui extends GuiContainer implements IContainerListener {
 				drawHoveringText(Arrays.asList(TextFormatting.ITALIC + "Memory card"), mouseX - guiLeft, mouseY - guiTop);
 		}
 		
-		if(buttonList.get(3).isMouseOver()) {
+		if(buttonList.get(2).isMouseOver()) {
 			drawHoveringText(Arrays.asList("Ctrl + Click to delete only from this memory card", "Ctrl + Alt + Click to delete from everywhere (forever)"), mouseX - guiLeft, mouseY - guiTop);
 		}
 	}
@@ -206,9 +199,6 @@ public class CameraGui extends GuiContainer implements IContainerListener {
 			ShootIt.network.sendToServer(new MessageCameraToServer((byte)0, true));
 			break;
 		case 2:
-			filters.setVisible(!filters.getVisible());
-			break;
-		case 3:
 			ItemStack item = mc.player.getHeldItemMainhand();
 			if(item.getItem() instanceof Camera)
 				if(item.hasTagCompound()) {
@@ -226,23 +216,5 @@ public class CameraGui extends GuiContainer implements IContainerListener {
 				}
 			break;
 		}
-	}
-
-	@Override
-	protected void mouseClicked(int mouseX, int mouseY, int mouseButton) throws IOException {
-		super.mouseClicked(mouseX, mouseY, mouseButton);
-		filters.mouseClicked(mouseX, mouseY, mouseButton);
-	}
-
-	@Override
-	protected void mouseReleased(int mouseX, int mouseY, int state) {
-		super.mouseReleased(mouseX, mouseY, state);
-		filters.mouseReleased(mouseX, mouseY, state);
-	}
-
-	@Override
-	public void handleMouseInput() throws IOException {
-		super.handleMouseInput();
-		filters.handleMouseInput();
 	}
 }

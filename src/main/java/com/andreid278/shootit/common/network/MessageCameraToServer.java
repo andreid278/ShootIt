@@ -5,6 +5,7 @@ import com.andreid278.shootit.common.item.Camera;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraftforge.fml.common.network.ByteBufUtils;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
@@ -13,6 +14,7 @@ public class MessageCameraToServer implements IMessage {
 	public byte messageID;
 	public boolean increase;
 	public int curShader;
+	public NBTTagCompound shaderNbt;
 
 	public MessageCameraToServer() {
 
@@ -27,9 +29,10 @@ public class MessageCameraToServer implements IMessage {
 		this.messageID = messageID;
 	}
 
-	public MessageCameraToServer(byte messageID, int curShader) {
+	public MessageCameraToServer(byte messageID, int curShader, NBTTagCompound shaderNbt) {
 		this.messageID = messageID;
 		this.curShader = curShader;
+		this.shaderNbt = shaderNbt;
 	}
 
 	@Override
@@ -37,8 +40,10 @@ public class MessageCameraToServer implements IMessage {
 		messageID = buf.readByte();
 		if(messageID == 0)
 			increase = buf.readBoolean();
-		else if(messageID == 3)
+		else if(messageID == 3) {
 			curShader = buf.readInt();
+			shaderNbt = ByteBufUtils.readTag(buf);
+		}
 	}
 
 	@Override
@@ -46,8 +51,10 @@ public class MessageCameraToServer implements IMessage {
 		buf.writeByte(messageID);
 		if(messageID == 0)
 			buf.writeBoolean(increase);
-		else if(messageID == 3)
+		else if(messageID == 3) {
 			buf.writeInt(curShader);
+			ByteBufUtils.writeTag(buf, shaderNbt);
+		}
 	}
 
 	public static class Handler implements IMessageHandler<MessageCameraToServer, IMessage> {
@@ -80,8 +87,9 @@ public class MessageCameraToServer implements IMessage {
 					break;
 				case 3:
 					nbt.setInteger("shader", message.curShader);
+					nbt.setTag("shaderInfo", message.shaderNbt);
 					item.setTagCompound(nbt);
-					return new MessageCameraToClient((byte)2, message.curShader);
+					return new MessageCameraToClient((byte)2, message.curShader, message.shaderNbt);
 				}
 			}
 			return null;

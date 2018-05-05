@@ -75,19 +75,4 @@ public class MCData {
 	}
 	
 	public static int lastShader = 0;
-	public static List<ShaderInfo> shaders = new ArrayList<>();
-	public class ShaderInfo {
-		public String name;
-		public ResourceLocation rl;
-		
-		public ShaderInfo(String name, ResourceLocation rl) {
-			this.name = name;
-			this.rl = rl;
-		}
-		
-		public ShaderInfo(String name) {
-			this.name = name;
-			rl = null;
-		}
-	}
 }

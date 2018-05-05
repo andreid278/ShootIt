@@ -12,8 +12,10 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
 import com.andreid278.shootit.ShootIt;
+import com.andreid278.shootit.client.ClientProxy;
 import com.andreid278.shootit.client.Resources;
 import com.andreid278.shootit.client.gui.GuiHandler;
+import com.andreid278.shootit.client.shader.ShaderManager;
 import com.andreid278.shootit.common.MCData;
 import com.andreid278.shootit.common.item.Camera;
 import com.google.common.io.Files;
@@ -47,7 +49,7 @@ public class CameraRenderEvents {
 		Minecraft mc = Minecraft.getMinecraft();
 		EntityPlayer ep = mc.player;
 		if(ep.getHeldItemMainhand().getItem() instanceof Camera) {
-			if(mc.gameSettings.thirdPersonView == 0) {
+			if(mc.gameSettings.thirdPersonView == 0 || mc.gameSettings.thirdPersonView == 2) {
 				Minecraft.getMinecraft().gameSettings.fovSetting = MCData.cameraFov;
 				
 				GlStateManager.pushMatrix();
@@ -62,6 +64,8 @@ public class CameraRenderEvents {
 				vertexbuffer.pos(sr.getScaledWidth_double(), 0.0D, 0).tex(1.0D, 0.0D).endVertex();
 				vertexbuffer.pos(0.0D, 0.0D, 0).tex(0.0D, 0.0D).endVertex();
 				tessellator.draw();
+				mc.fontRenderer.drawString("Shift + Wheel - Zoom In/Out", sr.getScaledWidth() * 2 / 256.0f, sr.getScaledHeight() * 135 / 150.0f, 16777215, false);
+				mc.fontRenderer.drawString("Shift + RMB - View photos; " + ClientProxy.cameraFilters.getDisplayName() + " - Camera settings", sr.getScaledWidth() * 2 / 256.0f, sr.getScaledHeight() * 3 / 150.0f, 16777215, false);
 				GlStateManager.disableBlend();
 				GlStateManager.popMatrix();
 
@@ -71,14 +75,18 @@ public class CameraRenderEvents {
 					if(nbt != null) {
 						int shader = nbt.getInteger("shader");
 						if(MCData.lastShader != shader) {
-							if(shader > 0) {
-								mc.entityRenderer.loadShader(MCData.shaders.get(shader).rl);
-							}
-							else mc.entityRenderer.stopUseShader();
+							ShaderManager.instance.loadShader(shader);
 							MCData.lastShader = shader;
 						}
+						
+						if(shader > 0) {
+							ShaderManager.instance.setCurShaderUnifroms(shader, nbt.getCompoundTag("shaderInfo"));
+						}
 					}
-					else MCData.lastShader = 0;
+					else {
+						MCData.lastShader = 0;
+						ShaderManager.instance.loadShader(0);
+					}
 				}
 				
 				if(MCData.isShooting) {
@@ -157,7 +165,7 @@ public class CameraRenderEvents {
 		}
 		
 		if(MCData.lastShader > 0) {
-			mc.entityRenderer.stopUseShader();
+			ShaderManager.instance.loadShader(0);
 			MCData.lastShader = 0;
 		}
 		

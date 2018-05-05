@@ -16,14 +16,19 @@ public class GuiScrollerEditor extends Gui {
 	private int y;
 	private int width;
 	private int height;
-	int min;
-	int max;
-	int step;
-	int curValue;
+	float min;
+	float max;
+	float step;
+	float curValue;
 	int curMouseX;
 	int curMouseY;
+	boolean isVertical;
+	boolean isChanged;
+	int sColorX, sColorY, sColorZ;
+	int bColorX, bColorY, bColorZ;
+	boolean isDragging;
 
-	public GuiScrollerEditor(int x, int y, int width, int height, int min, int max, int step) {
+	public GuiScrollerEditor(int x, int y, int width, int height, float min, float max, float step, float initValue, boolean isVertical, int scrollerColor, int backColor) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -31,49 +36,83 @@ public class GuiScrollerEditor extends Gui {
 		this.min = min;
 		this.max = max;
 		this.step = step;
-		this.curValue = min;
+		this.curValue = initValue;
 		curMouseX = 0;
 		curMouseY = 0;
+		this.isVertical = isVertical;
+		sColorX = (scrollerColor >> 16) & 0xff;
+		sColorY = (scrollerColor >> 8) & 0xff;
+		sColorZ = (scrollerColor >> 0) & 0xff;
+		bColorX = (backColor >> 16) & 0xff;
+		bColorY = (backColor >> 8) & 0xff;
+		bColorZ = (backColor >> 0) & 0xff;
+		isDragging = false;
 	}
 
 	public void draw(Minecraft mc, int mouseX, int mouseY) {
 		curMouseX = mouseX;
 		curMouseY = mouseY;
-		double scrollerMin = (double)height * (curValue - min) / (max - min);
-		double scrollerMax = (double)height * (curValue - min + step) / (max - min);
-		if(scrollerMax - scrollerMin < 3) {
-			scrollerMin = (scrollerMax + scrollerMin) / 2 - 1;
-			scrollerMax = scrollerMin + 2;
-		}
+
+		double scrollerMin = (double)(isVertical ? height : width) * (curValue - min) / (max - min) - 2;
+		double scrollerMax = scrollerMin + 4;
+
 		Tessellator tessellator = Tessellator.getInstance();
 		BufferBuilder vertexbuffer = tessellator.getBuffer();
 		GlStateManager.disableTexture2D();
 		vertexbuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		vertexbuffer.pos(x + width / 4, y, 0).color(128, 128, 128, 255).endVertex();
-		vertexbuffer.pos(x - width / 4, y, 0).color(128, 128, 128, 255).endVertex();
-		vertexbuffer.pos(x - width / 4, y + height, 0).color(128, 128, 128, 255).endVertex();
-		vertexbuffer.pos(x + width / 4, y + height, 0).color(128, 128, 128, 255).endVertex();
-		vertexbuffer.pos(x + width / 2, y + scrollerMin, 0).color(0, 0, 0, 255).endVertex();
-		vertexbuffer.pos(x - width / 2, y + scrollerMin, 0).color(0, 0, 0, 255).endVertex();
-		vertexbuffer.pos(x - width / 2, y + scrollerMax, 0).color(0, 0, 0, 255).endVertex();
-		vertexbuffer.pos(x + width / 2, y + scrollerMax, 0).color(0, 0, 0, 255).endVertex();
+		if(isVertical) {
+			vertexbuffer.pos(x + width / 4, y, 0).color(bColorX, bColorY, bColorZ, 255).endVertex();
+			vertexbuffer.pos(x - width / 4, y, 0).color(bColorX, bColorY, bColorZ, 255).endVertex();
+			vertexbuffer.pos(x - width / 4, y + height, 0).color(bColorX, bColorY, bColorZ, 255).endVertex();
+			vertexbuffer.pos(x + width / 4, y + height, 0).color(bColorX, bColorY, bColorZ, 255).endVertex();
+			vertexbuffer.pos(x + width / 2, y + scrollerMin, 0).color(sColorX, sColorY, sColorZ, 255).endVertex();
+			vertexbuffer.pos(x - width / 2, y + scrollerMin, 0).color(sColorX, sColorY, sColorZ, 255).endVertex();
+			vertexbuffer.pos(x - width / 2, y + scrollerMax, 0).color(sColorX, sColorY, sColorZ, 255).endVertex();
+			vertexbuffer.pos(x + width / 2, y + scrollerMax, 0).color(sColorX, sColorY, sColorZ, 255).endVertex();
+		}
+		else {
+			vertexbuffer.pos(x, y - height / 4, 0).color(bColorX, bColorY, bColorZ, 255).endVertex();
+			vertexbuffer.pos(x, y + height / 4, 0).color(bColorX, bColorY, bColorZ, 255).endVertex();
+			vertexbuffer.pos(x + width, y + height / 4, 0).color(bColorX, bColorY, bColorZ, 255).endVertex();
+			vertexbuffer.pos(x + width, y - height / 4, 0).color(bColorX, bColorY, bColorZ, 255).endVertex();
+			vertexbuffer.pos(x + scrollerMin, y - height / 2, 0).color(sColorX, sColorY, sColorZ, 255).endVertex();
+			vertexbuffer.pos(x + scrollerMin, y + height / 2, 0).color(sColorX, sColorY, sColorZ, 255).endVertex();
+			vertexbuffer.pos(x + scrollerMax, y + height / 2, 0).color(sColorX, sColorY, sColorZ, 255).endVertex();
+			vertexbuffer.pos(x + scrollerMax, y - height / 2, 0).color(sColorX, sColorY, sColorZ, 255).endVertex();
+		}
 		tessellator.draw();
 		GlStateManager.enableTexture2D();
 
 	}
 
 	public void mouseClicked(int mouseX, int mouseY, int mouseButton) {
-		
+		if(isMouseOverGui(mouseX, mouseY)) {
+			isDragging = true;
+		}
 	}
 
 	public void mouseClickMove(int mouseX, int mouseY, int clickedMouseButton, long timeSinceLastClick) {
-		if(!isMouseOverGui(mouseX, mouseY))
+		if(!isDragging)
 			return;
-		curValue = (int) ((double)(mouseY - y) / height * (max - min) + min);
+		if(isVertical) {
+			curValue = ((float)(mouseY - y) / (height) * (max - min) + min);
+		}
+		else {
+			curValue = ((float)(mouseX - x) / (width) * (max - min) + min);
+		}
+		
+		curValue = (int)((curValue + step / 2 - min) / step) * step + min;
+
 		if(curValue < min)
 			curValue = min;
-		if(curValue >= max)
-			curValue = max - step;
+		if(curValue > max)
+			curValue = max;
+		
+		markDirty();
+	}
+	
+	public void mouseReleased(int mouseX, int mouseY, int state) {
+		isDragging = false;
 	}
 
 	public void handleMouseInput() {
@@ -90,12 +129,19 @@ public class GuiScrollerEditor extends Gui {
 			curValue += wheel * step;
 			if(curValue < min)
 				curValue = min;
-			if(curValue >= max)
-				curValue = max - step;
+			if(curValue > max)
+				curValue = max;
+
+			markDirty();
 		}
 	}
-	
+
 	public boolean isMouseOverGui(int mouseX, int mouseY) {
-		return mouseX >= x - width / 2 && mouseX <= x + width / 2 && mouseY >= y - height && mouseY <= y + height;
+		return isVertical ? mouseX >= x - width / 2 && mouseX <= x + width / 2 && mouseY >= y - 2 && mouseY <= y + height + 2
+				: mouseX >= x - 2 && mouseX <= x + width + 2 && mouseY >= y - height / 2 && mouseY <= y + height / 2;
+	}
+
+	public void markDirty() {
+		isChanged = true;
 	}
 }

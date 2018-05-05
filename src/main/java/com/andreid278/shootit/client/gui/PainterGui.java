@@ -39,6 +39,8 @@ public class PainterGui extends GuiContainer {
 	GuiScrollerEditor red;
 	GuiScrollerEditor green;
 	GuiScrollerEditor blue;
+	int xS = 176;
+	int yS = 200;
 
 	public PainterGui(Container inventorySlotsIn) {
 		super(inventorySlotsIn);
@@ -48,29 +50,32 @@ public class PainterGui extends GuiContainer {
 		super(new PainterContainer(inventory, te));
 		this.xSize = 176;
 		this.ySize = 200;
+		this.width = Minecraft.getMinecraft().displayWidth;
+		this.height = Minecraft.getMinecraft().displayHeight;
 	}
 
 	public void initGui() {
 		super.initGui();
 		this.guiLeft = 10;
-		this.guiTop = (height - ySize) / 2;
+		this.guiTop = (height - yS) / 2;
 		this.buttonList.clear();
 		this.buttonList.add(new TrueButtonGui(0, 27 + guiLeft, 90 + guiTop, 38, 22, "<-Load"));
 		this.buttonList.add(new TrueButtonGui(1, 110 + guiLeft, 90 + guiTop, 38, 22, "Save->"));
 		this.buttonList.add(new TrueButtonGui(2, 70 + guiLeft, 90 + guiTop, 15, 22, "<-"));
 		this.buttonList.add(new TrueButtonGui(3, 90 + guiLeft, 90 + guiTop, 15, 22, "->"));
 		this.buttonList.add(new TrueButtonGui(4, 160 + guiLeft, 10 + guiTop, 10, 10, "<"));
-		int w = width - 30 - xSize;
+		int w = width - 30 - xS;
 		int h = height - 20;
 		if(w < h * 800 / 600)
 			h = w * 600 / 800;
 		else w = h * 800 / 600;
-		photoEditor = new GuiPhotoEditor(20 + xSize + (width - 30 - xSize) / 2 - w / 2, height / 2 - h / 2, w, h, width, height);
+		photoEditor = new GuiPhotoEditor(20 + xS + (width - 30 - xS) / 2 - w / 2, height / 2 - h / 2, w, h, width, height);
+		this.xSize = 20 + xS + (width - 30 - xS) / 2 - w / 2 + w - guiLeft;
 		toolsList = new GuiToolsList(this, mc, guiLeft + 8, guiTop + 23, 72, 60, 15, "Tools");
-		size = new GuiScrollerEditor(guiLeft + 100, guiTop + 23, 8, 60, 1, 50, 1);
-		red = new GuiScrollerEditor(guiLeft + 120, guiTop + 23, 6, 60, 0, 256, 1);
-		green = new GuiScrollerEditor(guiLeft + 134, guiTop + 23, 6, 60, 0, 256, 1);
-		blue = new GuiScrollerEditor(guiLeft + 148, guiTop + 23, 6, 60, 0, 256, 1);
+		size = new GuiScrollerEditor(guiLeft + 100, guiTop + 23, 8, 60, 1, 50, 1, 1, true, 0x000000, 0x808080);
+		red = new GuiScrollerEditor(guiLeft + 120, guiTop + 23, 6, 60, 0, 255, 1, 0, true, 0x000000, 0x808080);
+		green = new GuiScrollerEditor(guiLeft + 134, guiTop + 23, 6, 60, 0, 255, 1, 0, true, 0x000000, 0x808080);
+		blue = new GuiScrollerEditor(guiLeft + 148, guiTop + 23, 6, 60, 0, 255, 1, 0, true, 0x000000, 0x808080);
 	}
 	
 	@Override
@@ -84,8 +89,8 @@ public class PainterGui extends GuiContainer {
 		TEPainter te = ((PainterContainer)inventorySlots).te;
 		mc.getTextureManager().bindTexture(Resources.PAINTER_GUI);
 		int x = 10;
-		int y = (height - ySize) / 2;
-		drawTexturedModalRect(x, y, 0, 0, xSize, ySize, 1, 1);
+		int y = (height - yS) / 2;
+		drawTexturedModalRect(x, y, 0, 0, xS, yS, 1, 1);
 		ItemStack itemStack = inventorySlots.getSlot(36).getStack();
 		if(!itemStack.isEmpty()) {
 			if(itemStack.getItem() instanceof MemoryCard)
@@ -126,9 +131,9 @@ public class PainterGui extends GuiContainer {
 		red.draw(mc, mouseX, mouseY);
 		green.draw(mc, mouseX, mouseY);
 		blue.draw(mc, mouseX, mouseY);
-		int r = red.curValue << 16;
-		int g = green.curValue << 8;
-		int b = blue.curValue;
+		int r = (int)red.curValue << 16;
+		int g = (int)green.curValue << 8;
+		int b = (int)blue.curValue;
 		drawCenteredStringWithoutShadow(mc.fontRenderer, "Color", guiLeft + 134, guiTop + 10, r + g + b);
 		drawCenteredStringWithoutShadow(mc.fontRenderer, "Size", guiLeft + 100, guiTop + 10, 0);
 	}
@@ -216,6 +221,10 @@ public class PainterGui extends GuiContainer {
 		super.mouseClicked(mouseX, mouseY, mouseButton);
 		photoEditor.mouseClicked(mouseX, mouseY, mouseButton);
 		toolsList.mouseClicked(mouseX, mouseY, mouseButton);
+		size.mouseClicked(mouseX, mouseY, mouseButton);
+		red.mouseClicked(mouseX, mouseY, mouseButton);
+		green.mouseClicked(mouseX, mouseY, mouseButton);
+		blue.mouseClicked(mouseX, mouseY, mouseButton);
 	}
 
 	@Override
@@ -226,10 +235,10 @@ public class PainterGui extends GuiContainer {
 		red.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
 		green.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
 		blue.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick);
-		photoEditor.size = size.curValue;
-		photoEditor.red = red.curValue;
-		photoEditor.green = green.curValue;
-		photoEditor.blue = blue.curValue;
+		photoEditor.size = (int)size.curValue;
+		photoEditor.red = (int)red.curValue;
+		photoEditor.green = (int)green.curValue;
+		photoEditor.blue = (int)blue.curValue;
 	}
 
 	@Override
@@ -237,6 +246,10 @@ public class PainterGui extends GuiContainer {
 		super.mouseReleased(mouseX, mouseY, state);
 		toolsList.mouseReleased(mouseX, mouseY, state);
 		photoEditor.mouseReleased(mouseX, mouseY, state);
+		size.mouseReleased(mouseX, mouseY, state);
+		red.mouseReleased(mouseX, mouseY, state);
+		green.mouseReleased(mouseX, mouseY, state);
+		blue.mouseReleased(mouseX, mouseY, state);
 	}
 
 	@Override
@@ -247,8 +260,8 @@ public class PainterGui extends GuiContainer {
 		red.handleMouseInput();
 		green.handleMouseInput();
 		blue.handleMouseInput();
-		photoEditor.red = red.curValue;
-		photoEditor.green = green.curValue;
-		photoEditor.blue = blue.curValue;
+		photoEditor.red = (int)red.curValue;
+		photoEditor.green = (int)green.curValue;
+		photoEditor.blue = (int)blue.curValue;
 	}
 }

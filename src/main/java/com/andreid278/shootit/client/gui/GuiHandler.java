@@ -18,6 +18,7 @@ public class GuiHandler implements IGuiHandler {
 	public static final int PRINTER_GUI = 1;
 	public static final int CAMERA_GUI = 2;
 	public static final int PAINTER_GUI = 3;
+	public static final int CAMERA_FILTERS_GUI = 4;
 
 	@Override
 	public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
@@ -26,8 +27,8 @@ public class GuiHandler implements IGuiHandler {
 			break;
 		case PRINTER_GUI:
 			return new PrinterContainer(player.inventory, (TEPrinter)world.getTileEntity(new BlockPos(x, y, z)));
-//		case CAMERA_GUI:
-//			break;
+		case CAMERA_FILTERS_GUI:
+			break;
 		case CAMERA_GUI:
 			return new CameraContainer(player.inventory, new CameraInventory(player.getHeldItemMainhand()));
 		case PAINTER_GUI:
@@ -46,8 +47,9 @@ public class GuiHandler implements IGuiHandler {
 			break;
 		case PRINTER_GUI:
 			return new PrinterGui(player.inventory, (TEPrinter)world.getTileEntity(new BlockPos(x, y, z)));
-//		case CAMERA_GUI:
-//			return new CameraGui();
+		case CAMERA_FILTERS_GUI:
+			if(player.getHeldItemMainhand().getItem() instanceof Camera)
+				return new CameraFiltersGui(player.getHeldItemMainhand());
 		case CAMERA_GUI:
 			return new CameraGui(new CameraContainer(player.inventory, new CameraInventory(player.getHeldItemMainhand())));
 		case PAINTER_GUI:

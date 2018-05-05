@@ -22,11 +22,11 @@ public class PlayerEvents {
 		if(!event.player.world.getMinecraftServer().isDedicatedServer()) {
 			try {
 				String s = event.player.world.getSaveHandler().getWorldDirectory().getCanonicalPath();
-				s = s.replace("\\", "/");
-				MCData.photosFolderPathServer = event.player.world.getMinecraftServer().getDataDirectory().getCanonicalPath().replace("\\", "/") + "/photos/assets/photos/Singleplayer";
+				s = s.replace("\\", "/").toLowerCase();
+				MCData.photosFolderPathServer = event.player.world.getMinecraftServer().getDataDirectory().getCanonicalPath().replace("\\", "/").toLowerCase() + "/photos/assets/photos/singleplayer";
 				MCData.photosFolderPathServer += s.substring(s.lastIndexOf("/"));
 				MCData.photosFolderPathClient = MCData.photosFolderPathServer;
-				MCData.resourceLocationPath = "Singleplayer/" + s.substring(s.lastIndexOf("/") + 1);
+				MCData.resourceLocationPath = "singleplayer/" + s.substring(s.lastIndexOf("/") + 1);
 				File file = new File(MCData.photosFolderPathServer);
 				if(!file.isDirectory())
 					file.mkdirs();
@@ -37,7 +37,7 @@ public class PlayerEvents {
 		else {
 			if(MCData.photosFolderPathServer == "") {
 				try {
-					MCData.photosFolderPathServer = event.player.world.getMinecraftServer().getDataDirectory().getCanonicalPath().replace("\\", "/") + "/photos";
+					MCData.photosFolderPathServer = event.player.world.getMinecraftServer().getDataDirectory().getCanonicalPath().replace("\\", "/").toLowerCase() + "/photos";
 					File file = new File(MCData.photosFolderPathServer);
 					if(!file.isDirectory())
 						file.mkdirs();

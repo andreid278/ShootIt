@@ -9,6 +9,7 @@ uniform vec2 InSize;
 
 uniform vec2 BlurDir;
 uniform float Radius;
+uniform float BokehCoeff;
 
 void main() {
 	vec4 sum = vec4(0.0);
@@ -23,5 +24,5 @@ void main() {
 	
 	sum /= Radius;
 	
-	gl_FragColor = mix(sum, msum, 0.65);
+	gl_FragColor = mix(sum, msum, BokehCoeff);
 }

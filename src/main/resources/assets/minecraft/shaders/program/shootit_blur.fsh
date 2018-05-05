@@ -7,15 +7,14 @@ varying vec2 oneTexel;
 
 uniform vec2 InSize;
 
-uniform vec2 BlurDir;
 uniform float Radius;
 
 void main() {
 	vec4 sum = vec4(0.0);
-
-	vec2 startDir = -0.5 * BlurDir * (Radius - 1.0) * oneTexel;
-	for (int i = 0; i < Radius; i++)
-		sum += texture2D(DiffuseSampler, texCoord + startDir + oneTexel * BlurDir * float(i));
 	
-	gl_FragColor = vec4(sum.rgb / Radius, 1.0);
+	for (float i = -Radius; i <= Radius; i++)
+		for(float j = -Radius; j <= Radius; j++)
+			sum += texture2D(DiffuseSampler, texCoord + oneTexel * vec2(i, j));
+	
+	gl_FragColor = vec4(sum.rgb / ((2 * Radius + 1) * (2 * Radius + 1)), 1.0);
 }

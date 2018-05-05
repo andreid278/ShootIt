@@ -8,16 +8,20 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.lwjgl.input.Keyboard;
 
 import com.andreid278.shootit.ShootIt;
 import com.andreid278.shootit.client.event.CameraRenderEvents;
 import com.andreid278.shootit.client.event.InputEvents;
 import com.andreid278.shootit.client.event.PlayerRenderEvents;
+import com.andreid278.shootit.client.gui.CameraGui;
 import com.andreid278.shootit.client.gui.PrinterGui;
 import com.andreid278.shootit.client.renderer.RendererPainting;
+import com.andreid278.shootit.client.shader.ShaderManager;
 import com.andreid278.shootit.common.CommonProxy;
 import com.andreid278.shootit.common.MCData;
 import com.andreid278.shootit.common.PhotosData;
+import com.andreid278.shootit.common.container.CameraContainer;
 import com.andreid278.shootit.common.entity.EntityPainting;
 import com.andreid278.shootit.common.item.Camera;
 import com.andreid278.shootit.common.network.MessageCameraToClient;
@@ -37,6 +41,7 @@ import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.renderer.entity.RenderManager;
 import net.minecraft.client.renderer.texture.ITextureObject;
 import net.minecraft.client.resources.IResourcePack;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -47,6 +52,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.client.model.obj.OBJLoader;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -97,6 +103,8 @@ public class ClientProxy extends CommonProxy {
 			}
 		}
 	}
+	
+	public static KeyBinding cameraFilters;
 
 	@Override
 	public void init(FMLInitializationEvent event) {
@@ -106,7 +114,7 @@ public class ClientProxy extends CommonProxy {
 		rm.entityRenderMap.put(EntityPainting.class, new RendererPainting(rm));
 
 		try {
-			File file = new File(Minecraft.getMinecraft().mcDataDir.getCanonicalPath() + "/photos/assets/photos/Multiplayer/");
+			File file = new File(Minecraft.getMinecraft().mcDataDir.getCanonicalPath().toLowerCase() + "/photos/assets/photos/multiplayer/");
 			if(file.isDirectory()) {
 				for(File file1 : file.listFiles())
 					for(File f : file1.listFiles(new FilenameFilter() {
@@ -121,21 +129,16 @@ public class ClientProxy extends CommonProxy {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		cameraFilters = new KeyBinding("key.filters", Keyboard.KEY_LCONTROL, "key.categories.shootit");
+		ClientRegistry.registerKeyBinding(cameraFilters);
 	}
 
 	@Override
 	public void postInit(FMLPostInitializationEvent event) {
 		super.postInit(event);
 		
-		MCData.shaders.add(MCData.instance.new ShaderInfo("No filter"));
-		MCData.shaders.add(MCData.instance.new ShaderInfo("Gray", new ResourceLocation("minecraft", "shaders/post/shootit_gray.json")));
-		MCData.shaders.add(MCData.instance.new ShaderInfo("Red", new ResourceLocation("minecraft", "shaders/post/shootit_red.json")));
-		MCData.shaders.add(MCData.instance.new ShaderInfo("Green", new ResourceLocation("minecraft", "shaders/post/shootit_green.json")));
-		MCData.shaders.add(MCData.instance.new ShaderInfo("Blue", new ResourceLocation("minecraft", "shaders/post/shootit_blue.json")));
-		MCData.shaders.add(MCData.instance.new ShaderInfo("Low resolution", new ResourceLocation("minecraft", "shaders/post/shootit_resolution.json")));
-		MCData.shaders.add(MCData.instance.new ShaderInfo("Blur", new ResourceLocation("minecraft", "shaders/post/shootit_blur.json")));
-		MCData.shaders.add(MCData.instance.new ShaderInfo("Bokeh effect", new ResourceLocation("minecraft", "shaders/post/shootit_bokeh.json")));
-		//MCData.shaders.add(MCData.instance.new ShaderInfo("DOF", new ResourceLocation("minecraft", "shaders/post/shootit_dof.json")));
+		ShaderManager.instance.setUpFramebuffers();
 	}
 
 	@Override
@@ -173,11 +176,11 @@ public class ClientProxy extends CommonProxy {
 
 		if(!Minecraft.getMinecraft().isSingleplayer()) {
 			try {
-				String s = Minecraft.getMinecraft().getCurrentServerData().serverIP;
+				String s = Minecraft.getMinecraft().getCurrentServerData().serverIP.toLowerCase();
 				if(s.indexOf(':') > 0)
 					s = s.replace(':', '-');
-				MCData.photosFolderPathClient = Minecraft.getMinecraft().mcDataDir.getCanonicalPath() + "/photos/assets/photos/Multiplayer/" + s;
-				MCData.resourceLocationPath = "Multiplayer/" + s;
+				MCData.photosFolderPathClient = Minecraft.getMinecraft().mcDataDir.getCanonicalPath().toLowerCase() + "/photos/assets/photos/multiplayer/" + s;
+				MCData.resourceLocationPath = "multiplayer/" + s;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -222,15 +225,16 @@ public class ClientProxy extends CommonProxy {
 					nbt.setIntArray("indexes", ArrayUtils.removeElement(nbt.getIntArray("indexes"), message.curPhoto));
 					nbt.setInteger("curPhoto", 0);
 					item.setTagCompound(nbt);
+					if(Minecraft.getMinecraft().currentScreen instanceof CameraGui) {
+						CameraGui gui = (CameraGui) Minecraft.getMinecraft().currentScreen;
+						CameraContainer container = (CameraContainer) gui.inventorySlots;
+						container.cameraInventory.readFromNBT(nbt);
+					}
 					break;
 				case 2:
-					int shader = message.curPhoto;
-					nbt.setInteger("shader", shader);
+					nbt.setInteger("shader", message.curShader);
+					nbt.setTag("shaderInfo", message.shaderNbt);
 					item.setTagCompound(nbt);
-//					if(shader > 0)
-//						Minecraft.getMinecraft().entityRenderer.loadShader(MCData.shaders.get(shader).rl);
-//					else Minecraft.getMinecraft().entityRenderer.stopUseShader();
-//					MCData.lastShader = shader;
 					break;
 				}
 			}
